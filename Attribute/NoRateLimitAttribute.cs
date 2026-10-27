@@ -1,4 +1,4 @@
-﻿namespace BitCure.Patient360.Attribute
+﻿namespace Mandi.Attribute
 {
     using System;
 

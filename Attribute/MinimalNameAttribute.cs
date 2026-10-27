@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BitCure.Patient360.Attribute
+namespace Mandi.Attribute
 {
     public class MinimalNameAttribute : ValidationAttribute
     {
