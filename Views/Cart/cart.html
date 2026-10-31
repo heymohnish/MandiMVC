@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Your Cart - 10 Min Grocery</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="cart.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar sticky-top">
+        <div class="container py-2">
+            <div class="d-flex align-items-center w-100">
+                <a href="index.html" class="navbar-brand fw-bold d-flex align-items-center gap-2">
+                    <span class="brand-icon"><i class="bi bi-leaf-fill"></i></span>
+                    <span>10 Min <span class="brand-green">Grocery</span></span>
+                </a>
+                <div class="ms-auto d-flex gap-2">
+                    <a href="cart.html" class="nav-icon current" title="Cart">
+                        <i class="bi bi-cart3"></i>
+                        <span class="nav-badge" id="navCartCount">0</span>
+                    </a>
+                    <button class="nav-icon" id="themeToggle" type="button" title="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+                    <a href="profile.html" class="nav-icon" title="Profile"><i class="bi bi-person"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+        <div class="page-wrap">
+
+            <a href="index.html" class="back-link"><i class="bi bi-arrow-left"></i> Continue shopping</a>
+
+            <div class="page-head">
+                <h1>Your cart</h1>
+                <span class="count-chip" id="itemCountLabel">3 items</span>
+            </div>
+
+            <!-- ETA hero -->
+            <section class="eta-hero">
+                <div class="eta-ring">
+                    <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="36" /><circle class="bar" id="etaBar" cx="40" cy="40" r="36" /></svg>
+                    <div class="eta-clock" id="etaClock">10:00</div>
+                </div>
+                <div class="eta-text">
+                    <strong>Arriving soon</strong>
+                    <span>Order now to make the next delivery slot</span>
+                </div>
+            </section>
+
+            <div class="cart-grid">
+
+                <!-- Left: items + add-ons -->
+                <div class="cart-main">
+                    <div id="cartItems"></div>
+
+                    <div class="empty-state" id="emptyState">
+                        <div class="emoji">🧺</div>
+                        <h2>Your basket is empty</h2>
+                        <p>Add a few things and we'll have them at your door in 10 minutes.</p>
+                        <a href="index.html" class="btn-shop">Start shopping <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                    <h2 class="section-title">Forgot something?</h2>
+                    <div class="addon-scroll" id="addonList"></div>
+                </div>
+
+                <!-- Right: bill -->
+                <aside class="cart-side">
+                    <div class="bill-card">
+                        <h2>Bill summary</h2>
+                        <div class="bill-row"><span>Item total</span><span id="billSubtotal">₹0</span></div>
+                        <div class="bill-row"><span>Delivery fee</span><span id="billDelivery">₹0</span></div>
+                        <div class="bill-row"><span>Handling charge</span><span id="billHandling">₹0</span></div>
+                        <div class="savings-chip" id="savingsChip"><i class="bi bi-stars"></i><span id="savingsText"></span></div>
+                        <div class="bill-row total"><span>To pay</span><span id="billTotal">₹0</span></div>
+
+                        <button class="btn-place-order" id="placeOrderDesktop" data-bs-toggle="modal" data-bs-target="#deliveryModal">
+                            Place order <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <p class="bill-note"><i class="bi bi-lightning-charge-fill"></i> Delivered in about 10 minutes</p>
+                    </div>
+                </aside>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Sticky checkout (phones / tablets) -->
+    <div class="checkout-bar" id="checkoutBar">
+        <div class="checkout-inner">
+            <div class="total-block">
+                <strong id="stickyTotal">₹0</strong>
+                <span>Total for <span id="stickyCount">0</span> items</span>
+            </div>
+            <button class="btn-place-order" id="placeOrderMobile" data-bs-toggle="modal" data-bs-target="#deliveryModal">
+                Place order <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Delivery details modal -->
+    <div class="modal fade" id="deliveryModal" tabindex="-1" aria-labelledby="deliveryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="em-head">
+                    <span class="em-grip"></span>
+                    <button type="button" class="em-close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+                    <h5 id="deliveryModalLabel">Confirm delivery details</h5>
+                    <p>Tap the pencil to change anything before you order.</p>
+                </div>
+
+                <div class="em-body">
+                    <div id="deliveryFormView">
+
+                        <div class="d-row">
+                            <div class="d-icon"><i class="bi bi-person"></i></div>
+                            <div class="d-main">
+                                <span class="d-label">Deliver to</span>
+                                <div class="field-display" id="nameDisplay">Aarav Mehta</div>
+                            </div>
+                        </div>
+
+                        <div class="d-row">
+                            <div class="d-icon"><i class="bi bi-geo-alt"></i></div>
+                            <div class="d-main">
+                                <span class="d-label">Address</span>
+                                <div class="field-display" id="addressDisplay"></div>
+                                <textarea class="field-input d-none" id="addressInput" rows="2"></textarea>
+                            </div>
+                            <button type="button" class="edit-pencil" id="addressBtn" onclick="toggleEdit('address')" aria-label="Edit address"><i class="bi bi-pencil"></i></button>
+                        </div>
+
+                        <div class="d-row">
+                            <div class="d-icon"><i class="bi bi-telephone"></i></div>
+                            <div class="d-main">
+                                <span class="d-label">Phone number</span>
+                                <div class="field-display" id="phoneDisplay"></div>
+                                <input class="field-input d-none" id="phoneInput" type="tel">
+                            </div>
+                            <button type="button" class="edit-pencil" id="phoneBtn" onclick="toggleEdit('phone')" aria-label="Edit phone number"><i class="bi bi-pencil"></i></button>
+                        </div>
+
+                        <div class="d-row">
+                            <div class="d-icon"><i class="bi bi-chat-left-text"></i></div>
+                            <div class="d-main">
+                                <span class="d-label">Note for delivery partner (optional)</span>
+                                <textarea id="commentBox" rows="2" placeholder="E.g. leave at the door, call on arrival..."></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="orderSuccessView" class="success-view d-none">
+                        <div class="success-check">
+                            <svg viewBox="0 0 52 52" width="64" height="64">
+                                <circle class="success-check-circle" cx="26" cy="26" r="24" fill="none" />
+                                <path class="success-check-mark" fill="none" d="M14 27l7 7 16-16" />
+                            </svg>
+                        </div>
+                        <h3>Order placed!</h3>
+                        <p>Arriving in about 10 minutes</p>
+                    </div>
+                </div>
+
+                <div class="em-actions" id="modalFooterView">
+                    <button type="button" class="btn-confirm" onclick="confirmOrder()">
+                        <span>Confirm &amp; place order</span>
+                        <b id="modalTotal">₹0</b>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast-message"><i class="bi bi-check-circle-fill"></i><span>Added to cart</span></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="cart.js"></script>
+
+</body>
+</html>

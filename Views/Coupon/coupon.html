@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coupons & Offers - 10 Min Grocery</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="coupon.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar sticky-top">
+  <div class="container py-2">
+    <div class="d-flex align-items-center w-100">
+      <a href="index.html" class="navbar-brand fw-bold d-flex align-items-center gap-2">
+        <span class="brand-icon"><i class="bi bi-leaf-fill"></i></span>
+        <span>10 Min <span class="brand-green">Grocery</span></span>
+      </a>
+      <div class="ms-auto d-flex gap-2">
+        <a href="cart.html" class="nav-icon" title="Cart">
+          <i class="bi bi-cart3"></i>
+          <span class="nav-badge" id="navCartCount">0</span>
+        </a>
+        <button class="nav-icon" id="themeToggle" type="button" title="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+        <a href="profile.html" class="nav-icon" title="Profile"><i class="bi bi-person"></i></a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="page-wrap">
+
+    <a href="cart.html" class="back-link"><i class="bi bi-arrow-left"></i> Back to cart</a>
+
+    <div class="page-head">
+      <h1>Coupons &amp; Offers</h1>
+      <span class="count-chip" id="couponCountLabel">6 available</span>
+    </div>
+    <p class="page-sub">Tap <strong>Apply Coupon</strong> to browse every offer and pick the best one for your order.</p>
+
+    <!-- ============ Applied / empty coupon wallet ============ -->
+    <section class="wallet is-empty" id="wallet" aria-live="polite">
+
+      <div id="walletEmpty">
+        <div class="wallet-illus">🎟️</div>
+        <h3 class="wallet-h">No coupon applied yet</h3>
+        <p class="wallet-p"><strong id="availCount">6</strong> offers waiting · save up to <strong id="maxSave">₹0</strong> on this order</p>
+        <button type="button" class="btn-open-coupons" id="openCouponBtn">
+          <i class="bi bi-ticket-perforated-fill"></i> Apply Coupon
+        </button>
+      </div>
+
+      <div id="walletApplied" class="d-none">
+        <div class="applied-ticket" id="appliedTicket">
+          <div class="ticket-stub">
+            <span class="stub-emoji" id="stubEmoji">🎉</span>
+            <span class="saved-label">You saved</span>
+            <span class="saved-amount" id="stubAmount">₹0</span>
+          </div>
+          <div class="ticket-body">
+            <div class="ticket-row">
+              <span class="ticket-code" id="ticketCode">CODE</span>
+              <button type="button" class="ticket-copy" id="ticketCopy" title="Copy code" aria-label="Copy coupon code"><i class="bi bi-copy"></i></button>
+              <button type="button" class="ticket-remove" id="ticketRemove" title="Remove coupon" aria-label="Remove coupon"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <p class="ticket-title" id="ticketTitle">Coupon title</p>
+            <p class="ticket-note" id="ticketNote">Discount applied</p>
+            <div class="ticket-foot">
+              <span class="applied-pill"><i class="bi bi-check-circle-fill"></i> Applied</span>
+              <button type="button" class="btn-change" id="changeCouponBtn"><i class="bi bi-arrow-repeat"></i> Change</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Delivery detail ============ -->
+    <h2 class="section-title"><i class="bi bi-geo-alt"></i> Delivering to</h2>
+
+    <div class="d-row">
+      <div class="d-icon"><i class="bi bi-person"></i></div>
+      <div class="d-main">
+        <span class="d-label">Deliver to</span>
+        <div class="field-display" id="nameDisplay">Aarav Mehta</div>
+      </div>
+    </div>
+
+    <div class="d-row">
+      <div class="d-icon"><i class="bi bi-geo-alt"></i></div>
+      <div class="d-main">
+        <span class="d-label">Address</span>
+        <div class="field-display" id="addressDisplay"></div>
+        <textarea class="field-input d-none" id="addressInput" rows="2"></textarea>
+      </div>
+      <button type="button" class="edit-pencil" id="addressBtn" onclick="toggleEdit('address')" aria-label="Edit address"><i class="bi bi-pencil"></i></button>
+    </div>
+
+    <div class="d-row">
+      <div class="d-icon"><i class="bi bi-telephone"></i></div>
+      <div class="d-main">
+        <span class="d-label">Phone number</span>
+        <div class="field-display" id="phoneDisplay"></div>
+        <input class="field-input d-none" id="phoneInput" type="tel">
+      </div>
+      <button type="button" class="edit-pencil" id="phoneBtn" onclick="toggleEdit('phone')" aria-label="Edit phone number"><i class="bi bi-pencil"></i></button>
+    </div>
+
+    <!-- ============ Order summary ============ -->
+    <div class="bill-card">
+      <h2>Order summary</h2>
+
+      <div class="saved-banner" id="savedBanner">
+        <i class="bi bi-piggy-bank-fill"></i><span id="savedBannerText"></span>
+      </div>
+
+      <button type="button" class="bill-coupon-cta" id="billCouponBtn">
+        <i class="bi bi-ticket-perforated-fill lead-icon"></i>
+        <span>Apply Coupon</span>
+        <i class="bi bi-chevron-right chev"></i>
+      </button>
+
+      <div class="bill-row"><span>Item total</span><span id="billSubtotal">₹0</span></div>
+      <div class="bill-row" id="couponRow" style="display:none;"></div>
+      <div class="bill-row"><span>Delivery fee</span><span id="billDelivery">₹0</span></div>
+      <div class="bill-row"><span>Handling charge</span><span id="billHandling">₹0</span></div>
+      <div class="bill-row total"><span>To pay</span><span id="billTotal">₹0</span></div>
+
+      <a href="cart.html" class="btn-place-order">Proceed to cart <i class="bi bi-arrow-right"></i></a>
+      <p class="bill-note"><i class="bi bi-lightning-charge-fill"></i> Applied coupons carry over to checkout</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- ============ Coupon modal / bottom sheet ============ -->
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+<div class="sheet" id="couponSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
+  <div class="sheet-handle"></div>
+
+  <header class="sheet-head">
+    <div>
+      <h3 id="sheetTitle">Available Coupons</h3>
+      <p><span id="sheetCount">6</span> offers · up to <span id="sheetMax">30%</span> off</p>
+    </div>
+    <button type="button" class="sheet-close" id="sheetClose" aria-label="Close coupons"><i class="bi bi-x-lg"></i></button>
+  </header>
+
+  <div class="coupon-search">
+    <i class="bi bi-search"></i>
+    <input id="couponSearch" type="search" placeholder="Search by code or title…" autocomplete="off">
+  </div>
+
+  <div class="sheet-body" id="couponList"></div>
+
+  <div class="no-coupons" id="noCoupons">
+    <div class="emoji">🔍</div>
+    <h5>No coupons found</h5>
+    <p>Try a different code or keyword.</p>
+  </div>
+
+  <footer class="sheet-foot">
+    <div class="foot-info">
+      <span class="lbl" id="footLabel">Select a coupon to apply</span>
+      <span class="val" id="footValue">—</span>
+    </div>
+    <button type="button" class="btn-apply-selected" id="applySelectedBtn" disabled>Apply</button>
+  </footer>
+</div>
+
+<div id="toast" class="toast-message"><i class="bi bi-check-circle-fill"></i><span>Coupon applied</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="coupon.js"></script>
+</body>
+</html>

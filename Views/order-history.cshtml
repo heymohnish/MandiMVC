@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Order history — 10 Min Grocery</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; }
+
+    /* ---------- Tokens (shared across the whole app) ---------- */
+    :root {
+      --ink: #16241D; --muted: #6B7A70; --bg: #FCFBF7; --surface: #FFFFFF; --soft: #F3F6EF;
+      --forest: #123524; --forest-2: #1B4332; --lime: #C6F135; --lime-ink: #294011;
+      --coral: #FF6B4A; --on-coral: #FFFFFF; --line: #E7E5DC; --brand: #123524;
+      --tile: linear-gradient(155deg, #EAF3EC, #DCEBDF);
+      --hero-a: #123524; --hero-b: #1F5A3F;
+      --shadow: 0 16px 32px -18px rgba(18, 53, 36, .55);
+    }
+    body.dark-mode {
+      --ink: #EDEDE7; --muted: #93A398; --bg: #0F1712; --surface: #182019; --soft: #1E2A22;
+      --forest: #2F6B4E; --forest-2: #3A7D5C; --lime-ink: #182B10;
+      --coral: #FF8768; --on-coral: #2B0F08; --line: #263029; --brand: #C6F135;
+      --tile: linear-gradient(155deg, #1F3327, #16241D);
+      --hero-a: #16382A; --hero-b: #24563E;
+      --shadow: 0 16px 32px -18px rgba(0, 0, 0, .85);
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+      transition: background .2s ease, color .2s ease;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    h1, h2, h3, h5, .navbar-brand { font-family: 'Fredoka', system-ui, sans-serif; }
+    a { text-decoration: none; }
+
+    @keyframes bump { 45% { transform: scale(1.35); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes floaty { 50% { transform: translateY(-6px); } }
+
+    /* ---------- Navbar (same as cart) ---------- */
+    .navbar { background: var(--surface) !important; border-bottom: 1px solid var(--line); }
+    .navbar-brand { color: var(--ink); font-size: 1.2rem; font-weight: 600; }
+    .navbar-brand:hover { color: var(--ink); }
+    .brand-icon {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 12px; background: var(--lime); color: var(--forest); transform: rotate(-8deg);
+    }
+    .brand-green { position: relative; z-index: 0; color: var(--ink); }
+    .brand-green::after {
+      content: ''; position: absolute; left: -3px; right: -3px; bottom: 3px;
+      height: 9px; background: var(--lime); opacity: .75; z-index: -1; border-radius: 4px;
+    }
+    body.dark-mode .brand-green { color: var(--lime); }
+    body.dark-mode .brand-green::after { display: none; }
+
+    .nav-icon {
+      position: relative; width: 40px; height: 40px; display: grid; place-items: center;
+      border: 1.5px solid var(--line); border-radius: 50%;
+      background: var(--surface); color: var(--ink); font-size: 1.05rem; transition: background .15s;
+    }
+    .nav-icon:hover { background: var(--soft); color: var(--ink); }
+    .nav-icon.current { background: var(--forest); border-color: var(--forest); color: #fff; }
+    .nav-badge {
+      position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px;
+      display: grid; place-items: center; border-radius: 999px;
+      background: var(--coral); color: var(--on-coral); font-size: .65rem; font-weight: 800;
+    }
+
+    /* ---------- Page ---------- */
+    .page-wrap { max-width: 640px; margin: auto; animation: fadeUp .4s ease both; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+      color: var(--muted); font-size: .85rem; font-weight: 600;
+    }
+    .back-link:hover { color: var(--brand); }
+
+    .page-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .page-head h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 600; }
+    .count-chip {
+      padding: 4px 12px; border-radius: 999px; background: rgba(198, 241, 53, .4); color: var(--forest);
+      font-size: .76rem; font-weight: 700;
+    }
+    body.dark-mode .count-chip { background: rgba(198, 241, 53, .14); color: var(--lime); }
+
+    /* ---------- ETA hero (re-uses cart visual) ---------- */
+    .eta-hero {
+      position: relative; overflow: hidden; display: flex; align-items: center; gap: 18px;
+      margin-bottom: 22px; padding: 20px 24px; border-radius: 26px; color: #fff;
+      background: linear-gradient(120deg, var(--hero-a), var(--hero-b));
+    }
+    .eta-hero::before {
+      content: ''; position: absolute; right: -70px; top: -100px; width: 280px; height: 280px;
+      border-radius: 50%; border: 2px dashed rgba(198, 241, 53, .35);
+    }
+    .eta-hero::after {
+      content: ''; position: absolute; right: 50px; bottom: -130px; width: 220px; height: 220px;
+      border-radius: 50%; background: rgba(198, 241, 53, .1);
+    }
+    .eta-icon {
+      position: relative; z-index: 1; flex: 0 0 56px; width: 56px; height: 56px;
+      display: grid; place-items: center; border-radius: 18px;
+      background: rgba(255, 255, 255, .12); border: 1.5px solid rgba(255, 255, 255, .25);
+      font-size: 1.6rem;
+    }
+    .eta-text { position: relative; z-index: 1; }
+    .eta-text strong { display: block; margin-bottom: 2px; font-family: 'Fredoka'; font-size: 1.25rem; font-weight: 600; }
+    .eta-text span { color: rgba(255, 255, 255, .75); font-size: .88rem; }
+
+    /* ---------- Order list ---------- */
+    .order-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .order-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      cursor: pointer;
+      transition: border-color .15s, transform .15s, box-shadow .15s;
+      animation: fadeUp .35s ease both;
+    }
+    .order-card:hover { border-color: var(--forest); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .order-card:active { transform: scale(.985); }
+
+    /* stacked thumbs */
+    .item-thumb-stack {
+      position: relative;
+      flex: 0 0 58px;
+      width: 58px; height: 46px;
+    }
+    .item-thumb-stack span {
+      position: absolute; top: 0;
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      background: var(--tile);
+      border: 2px solid var(--surface);
+      display: grid; place-items: center;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 6px rgba(18, 53, 36, .08);
+    }
+    .item-thumb-stack span:nth-child(1) { left: 0; z-index: 3; }
+    .item-thumb-stack span:nth-child(2) { left: 16px; z-index: 2; }
+    .item-thumb-stack span:nth-child(3) { left: 32px; z-index: 1; }
+
+    .order-info { flex: 1; min-width: 0; }
+    .order-id-row { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+    .order-id { font-weight: 700; font-size: .92rem; }
+    .order-date { color: var(--muted); font-size: .76rem; }
+    .order-summary {
+      color: var(--muted); font-size: .82rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .order-right { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .order-total { font-family: 'Fredoka'; font-weight: 600; font-size: 1.05rem; color: var(--brand); }
+
+    .status-pill {
+      display: inline-block; font-size: .7rem; font-weight: 700;
+      padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+    }
+    .status-delivered { background: rgba(198, 241, 53, .4); color: var(--forest); }
+    body.dark-mode .status-delivered { background: rgba(198, 241, 53, .14); color: var(--lime); }
+    .status-onway { background: rgba(18, 53, 36, .1); color: var(--forest); }
+    body.dark-mode .status-onway { background: rgba(47, 107, 78, .35); color: #BFE3CF; }
+    .status-cancelled { background: rgba(255, 107, 74, .14); color: var(--coral); }
+
+    /* Empty state (matches cart) */
+    .empty-state {
+      display: none; text-align: center; padding: 48px 24px; margin-bottom: 12px;
+      border: 2px dashed var(--line); border-radius: 22px; color: var(--muted);
+      background: linear-gradient(160deg, rgba(198, 241, 53, .16), transparent 60%), var(--surface);
+    }
+    .empty-state.show { display: block; }
+    .empty-state .emoji { display: inline-block; margin-bottom: 8px; font-size: 2.8rem; animation: floaty 4s ease-in-out infinite; }
+    .empty-state h2 { margin-bottom: 6px; font-size: 1.2rem; color: var(--ink); }
+    .empty-state p { max-width: 360px; margin: 0 auto; font-size: .88rem; }
+    .btn-shop {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 11px 22px; border-radius: 999px;
+      background: var(--forest); color: #fff; font-size: .85rem; font-weight: 700; transition: background .15s, transform .15s;
+    }
+    .btn-shop:hover { background: var(--forest-2); color: #fff; transform: translateY(-2px); }
+
+    /* ---------- Order detail modal (reshaped to match cart modal) ---------- */
+    .modal-backdrop { --bs-backdrop-bg: #07120c; }
+    .modal-backdrop.show { --bs-backdrop-opacity: .6; }
+    .modal-content {
+      display: flex; flex-direction: column; max-height: calc(100vh - 3.5rem); overflow: hidden;
+      border: 0; border-radius: 28px; background: var(--surface); color: var(--ink);
+      box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .65);
+    }
+    .em-head {
+      position: relative; flex: 0 0 auto; padding: 24px 24px 20px; color: #fff;
+      background: linear-gradient(120deg, var(--hero-a), var(--hero-b));
+    }
+    .em-head::after {
+      content: ''; position: absolute; right: -40px; top: -60px; width: 170px; height: 170px;
+      border-radius: 50%; border: 2px dashed rgba(198, 241, 53, .35);
+    }
+    .em-head h5 { position: relative; z-index: 1; margin: 0 0 2px; font-size: 1.3rem; font-weight: 600; }
+    .em-head p { position: relative; z-index: 1; margin: 0; color: rgba(255, 255, 255, .72); font-size: .82rem; }
+    .em-close {
+      position: absolute; right: 14px; top: 14px; z-index: 5;
+      width: 34px; height: 34px; display: grid; place-items: center;
+      border: 1px solid rgba(255, 255, 255, .3); border-radius: 50%;
+      background: rgba(255, 255, 255, .14); color: #fff;
+    }
+    .em-close:hover { background: rgba(255, 255, 255, .25); }
+    .em-grip { display: none; position: absolute; top: 8px; left: 50%; width: 44px; height: 5px; border-radius: 9px; background: rgba(255, 255, 255, .4); transform: translateX(-50%); }
+    .em-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 20px 24px 8px; }
+
+    /* timeline */
+    .status-timeline { display: flex; justify-content: space-between; margin: 4px 0 22px; position: relative; }
+    .status-timeline::before {
+      content: ''; position: absolute; top: 9px; left: 14px; right: 14px;
+      height: 2px; background: var(--line); z-index: 0;
+    }
+    .tl-step { position: relative; z-index: 1; flex: 1; text-align: center; }
+    .tl-dot {
+      width: 20px; height: 20px; border-radius: 50%; background: var(--line);
+      border: 2px solid var(--surface); margin: 0 auto 6px;
+      display: grid; place-items: center; font-size: .65rem; color: #fff;
+    }
+    .tl-step.done .tl-dot { background: var(--forest); }
+    .tl-step.cancelled .tl-dot { background: var(--coral); }
+    .tl-label { font-size: .68rem; color: var(--muted); }
+    .tl-step.done .tl-label { color: var(--ink); font-weight: 600; }
+
+    /* detail sections */
+    .detail-section { margin-bottom: 18px; }
+    .detail-section > label {
+      display: block; font-size: .74rem; font-weight: 600;
+      color: var(--muted); margin-bottom: 8px; letter-spacing: .02em;
+    }
+    .detail-line-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 0; border-bottom: 1px solid var(--line); font-size: .88rem;
+    }
+    .detail-line-item:last-child { border-bottom: none; }
+    .dli-thumb {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: var(--tile); display: grid; place-items: center;
+      font-size: 1.05rem; flex-shrink: 0;
+    }
+    .dli-info { flex: 1; min-width: 0; }
+    .dli-name { font-weight: 600; }
+    .dli-qty { color: var(--muted); font-size: .76rem; }
+    .dli-price { font-family: 'Fredoka'; font-weight: 600; font-size: .95rem; color: var(--brand); }
+
+    .bill-row {
+      display: flex; justify-content: space-between;
+      font-size: .86rem; color: var(--muted); margin-bottom: 7px;
+    }
+    .bill-row.total {
+      color: var(--ink); font-weight: 800; font-size: 1rem;
+      border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 6px;
+    }
+    .bill-row.total span:last-child { font-family: 'Fredoka'; font-size: 1.15rem; color: var(--brand); }
+    .address-text { font-size: .88rem; line-height: 1.45; margin: 0; }
+
+    /* modal footer buttons (cart style) */
+    .em-actions {
+      flex: 0 0 auto; padding: 12px 24px calc(22px + env(safe-area-inset-bottom, 0px));
+      display: flex; gap: 10px; border-top: 1px solid var(--line);
+    }
+    .btn-reorder {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      height: 52px; border: 0; border-radius: 999px;
+      background: var(--lime); color: var(--lime-ink);
+      font-size: .95rem; font-weight: 800;
+      transition: transform .12s, box-shadow .2s;
+    }
+    .btn-reorder:hover { transform: translateY(-1px); box-shadow: 0 12px 22px -10px rgba(198, 241, 53, .9); }
+    .btn-help {
+      flex: 0 0 auto; padding: 0 22px; height: 52px;
+      border: 1.5px solid var(--line); border-radius: 999px;
+      background: transparent; color: var(--ink);
+      font-size: .95rem; font-weight: 700;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-help:hover { background: var(--soft); border-color: var(--forest); }
+
+    /* toast (re-use cart's) */
+    .toast-message {
+      position: fixed; left: 50%; z-index: 2000; bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      max-width: calc(100vw - 32px); display: flex; align-items: center; gap: 9px;
+      padding: 12px 20px; border-radius: 999px;
+      background: var(--lime); color: var(--lime-ink);
+      font-size: .85rem; font-weight: 700;
+      box-shadow: 0 16px 28px -12px rgba(0, 0, 0, .5);
+      opacity: 0; pointer-events: none; transform: translate(-50%, 30px);
+      transition: opacity .25s, transform .25s;
+    }
+    .toast-message.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 575.98px) {
+      .navbar-brand { font-size: 1rem; }
+      .eta-hero { padding: 16px 18px; gap: 14px; border-radius: 22px; }
+      .eta-icon { flex-basis: 48px; width: 48px; height: 48px; font-size: 1.3rem; }
+      .eta-text strong { font-size: 1.05rem; }
+      .eta-text span { font-size: .8rem; }
+      .item-thumb-stack { flex-basis: 50px; width: 50px; height: 42px; }
+      .item-thumb-stack span { width: 38px; height: 38px; font-size: 1rem; }
+      .item-thumb-stack span:nth-child(1) { left: 0; }
+      .item-thumb-stack span:nth-child(2) { left: 13px; }
+      .item-thumb-stack span:nth-child(3) { left: 26px; }
+
+      .modal-dialog { margin: 0; max-width: none; min-height: 100%; align-items: flex-end; }
+      .modal.fade .modal-dialog { transform: translateY(100%); transition: transform .38s cubic-bezier(.2, .9, .3, 1); }
+      .modal.show .modal-dialog { transform: none; }
+      .modal-content { width: 100%; max-height: 92vh; border-radius: 28px 28px 0 0; }
+      .em-grip { display: block; }
+      .em-head { padding-top: 28px; }
+      .em-actions { flex-direction: column; }
+      .btn-help { width: 100%; order: 2; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+  <link rel="stylesheet" href="scrollbar.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar sticky-top">
+  <div class="container py-2">
+    <div class="d-flex align-items-center w-100">
+      <a href="index.html" class="navbar-brand fw-bold d-flex align-items-center gap-2">
+        <span class="brand-icon"><i class="bi bi-leaf-fill"></i></span>
+        <span>10 Min <span class="brand-green">Grocery</span></span>
+      </a>
+      <div class="ms-auto d-flex gap-2">
+        <a href="cart.html" class="nav-icon" title="Cart">
+          <i class="bi bi-cart3"></i>
+          <span class="nav-badge" id="navCartCount">0</span>
+        </a>
+        <button class="nav-icon" id="themeToggle" type="button" title="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+        <a href="profile.html" class="nav-icon current" title="Profile"><i class="bi bi-person"></i></a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="page-wrap">
+
+    <a href="profile.html" class="back-link"><i class="bi bi-arrow-left"></i> Back to profile</a>
+
+    <div class="page-head">
+      <h1>Order history</h1>
+      <span class="count-chip" id="orderCountLabel">5 orders</span>
+    </div>
+
+    <!-- Hero -->
+    <section class="eta-hero">
+      <div class="eta-icon">📦</div>
+      <div class="eta-text">
+        <strong>Your past orders</strong>
+        <span>Tap any order to see items, bill and delivery details</span>
+      </div>
+    </section>
+
+    <!-- Order list -->
+    <div class="order-list" id="orderList"></div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="emoji">🧺</div>
+      <h2>No orders yet</h2>
+      <p>Your past orders will show up here. Time to fill your basket!</p>
+      <a href="index.html" class="btn-shop">Start shopping <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+  </div>
+</main>
+
+<!-- Order detail modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="em-head">
+        <span class="em-grip"></span>
+        <button type="button" class="em-close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        <h5 id="modalOrderId">Order #Q10234</h5>
+        <p id="modalOrderDate">27 Sep, 8:42 PM</p>
+      </div>
+
+      <div class="em-body">
+        <div class="status-timeline" id="modalTimeline"></div>
+
+        <div class="detail-section">
+          <label>Items</label>
+          <div id="modalItems"></div>
+        </div>
+
+        <div class="detail-section">
+          <label>Bill details</label>
+          <div class="bill-row"><span>Item total</span><span id="modalSubtotal">₹0</span></div>
+          <div class="bill-row"><span>Delivery fee</span><span id="modalDeliveryFee">₹0</span></div>
+          <div class="bill-row"><span>Handling charge</span><span id="modalHandling">₹0</span></div>
+          <div class="bill-row total"><span>Total paid</span><span id="modalTotal">₹0</span></div>
+        </div>
+
+        <div class="detail-section">
+          <label>Delivered to</label>
+          <p class="address-text" id="modalAddress"></p>
+        </div>
+
+        <div class="detail-section">
+          <label>Payment method</label>
+          <p class="address-text" id="modalPayment"></p>
+        </div>
+      </div>
+
+      <div class="em-actions">
+        <button class="btn-help" type="button">Get help</button>
+        <button class="btn-reorder" type="button" onclick="reorderFromModal()">
+          <i class="bi bi-arrow-repeat"></i> Reorder
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast-message"><i class="bi bi-check-circle-fill"></i><span>Added to cart</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => '₹' + n;
+
+  /* ---------- Dark mode (same key as cart page) ---------- */
+  const themeToggle = $('themeToggle');
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('grocery-theme'); } catch (e) {}
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (savedTheme ? savedTheme === 'dark' : prefersDark) document.body.classList.add('dark-mode');
+
+  function updateThemeIcon() {
+    themeToggle.innerHTML = document.body.classList.contains('dark-mode')
+      ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
+  }
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    try { localStorage.setItem('grocery-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); } catch (e) {}
+    updateThemeIcon();
+  });
+  updateThemeIcon();
+
+  /* ---------- Sample orders ---------- */
+  const orders = [
+    {
+      id: 'Q10238',
+      date: '27 Sep, 8:42 PM',
+      status: 'delivered',
+      items: [
+        { name: 'Fresh tomatoes', qty: 2, price: 42, emoji: '🍅' },
+        { name: 'Toned milk', qty: 1, price: 58, emoji: '🥛' },
+        { name: 'Multigrain bread', qty: 1, price: 120, emoji: '🍞' }
+      ],
+      deliveryFee: 15, handling: 6,
+      address: '204, Lakeview Apartments, 5th Cross, Singanallur, Coimbatore – 641005',
+      payment: 'UPI · Paid via Google Pay'
+    },
+    {
+      id: 'Q10221',
+      date: '25 Sep, 6:10 PM',
+      status: 'delivered',
+      items: [
+        { name: 'Bananas', qty: 1, price: 35, emoji: '🍌' },
+        { name: 'Eggs (6)', qty: 2, price: 48, emoji: '🥚' }
+      ],
+      deliveryFee: 15, handling: 6,
+      address: '204, Lakeview Apartments, 5th Cross, Singanallur, Coimbatore – 641005',
+      payment: 'Cash on delivery'
+    },
+    {
+      id: 'Q10199',
+      date: '22 Sep, 1:05 PM',
+      status: 'onway',
+      items: [
+        { name: 'Coffee 100g', qty: 1, price: 165, emoji: '☕' },
+        { name: 'Cheese slices', qty: 1, price: 99, emoji: '🧀' },
+        { name: 'Toned milk', qty: 2, price: 58, emoji: '🥛' }
+      ],
+      deliveryFee: 15, handling: 6,
+      address: '12, Green Park Residency, Race Course Road, Coimbatore – 641018',
+      payment: 'UPI · Paid via PhonePe'
+    },
+    {
+      id: 'Q10176',
+      date: '19 Sep, 9:30 AM',
+      status: 'cancelled',
+      items: [
+        { name: 'Multigrain bread', qty: 1, price: 120, emoji: '🍞' }
+      ],
+      deliveryFee: 0, handling: 0,
+      address: '204, Lakeview Apartments, 5th Cross, Singanallur, Coimbatore – 641005',
+      payment: 'UPI · Refunded to Google Pay'
+    },
+    {
+      id: 'Q10142',
+      date: '14 Sep, 7:52 PM',
+      status: 'delivered',
+      items: [
+        { name: 'Fresh tomatoes', qty: 1, price: 42, emoji: '🍅' },
+        { name: 'Bananas', qty: 2, price: 35, emoji: '🍌' },
+        { name: 'Eggs (6)', qty: 1, price: 48, emoji: '🥚' }
+      ],
+      deliveryFee: 15, handling: 6,
+      address: '204, Lakeview Apartments, 5th Cross, Singanallur, Coimbatore – 641005',
+      payment: 'UPI · Paid via Google Pay'
+    }
+  ];
+
+  const statusMeta = {
+    delivered: { label: 'Delivered', cls: 'status-delivered' },
+    onway: { label: 'On the way', cls: 'status-onway' },
+    cancelled: { label: 'Cancelled', cls: 'status-cancelled' }
+  };
+
+  function orderTotal(order) {
+    const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0);
+    return subtotal + order.deliveryFee + order.handling;
+  }
+  const itemSummary = (order) => order.items.map((i) => i.name).join(', ');
+
+  /* ---------- Render list ---------- */
+  function renderList() {
+    const list = $('orderList');
+    const has = orders.length > 0;
+    $('orderCountLabel').textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
+    $('emptyState').classList.toggle('show', !has);
+    list.style.display = has ? 'flex' : 'none';
+
+    list.innerHTML = orders.map((order, idx) => {
+      const meta = statusMeta[order.status];
+      const thumbs = order.items.slice(0, 3).map((i) => `<span>${i.emoji}</span>`).join('');
+      return `
+        <div class="order-card" onclick="openOrder(${idx})">
+          <div class="item-thumb-stack">${thumbs}</div>
+          <div class="order-info">
+            <div class="order-id-row">
+              <span class="order-id">#${order.id}</span>
+              <span class="order-date">${order.date}</span>
+            </div>
+            <div class="order-summary">${itemSummary(order)}</div>
+          </div>
+          <div class="order-right">
+            <div class="order-total">${money(orderTotal(order))}</div>
+            <span class="status-pill ${meta.cls}">${meta.label}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    // initial cart badge (kept in sync with other pages)
+    updateCartBadge();
+  }
+
+  function updateCartBadge() {
+    let count = 0;
+    try {
+      const raw = localStorage.getItem('grocery-cart');
+      if (raw) {
+        const cart = JSON.parse(raw);
+        count = cart.reduce((s, i) => s + (i.qty || 1), 0);
+      }
+    } catch (e) {}
+    const badge = $('navCartCount');
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'grid' : 'none';
+  }
+
+  /* ---------- Timeline ---------- */
+  function buildTimeline(status) {
+    const steps = ['Placed', 'Packed', 'Out for delivery', 'Delivered'];
+    if (status === 'cancelled') {
+      return `
+        <div class="tl-step done"><div class="tl-dot">✓</div><div class="tl-label">Placed</div></div>
+        <div class="tl-step cancelled"><div class="tl-dot">✕</div><div class="tl-label">Cancelled</div></div>`;
+    }
+    const doneCount = status === 'delivered' ? 4 : status === 'onway' ? 3 : 1;
+    return steps.map((label, i) => {
+      const done = i < doneCount;
+      return `<div class="tl-step ${done ? 'done' : ''}"><div class="tl-dot">${done ? '✓' : ''}</div><div class="tl-label">${label}</div></div>`;
+    }).join('');
+  }
+
+  /* ---------- Modal ---------- */
+  let currentOrderIdx = null;
+
+  function openOrder(idx) {
+    currentOrderIdx = idx;
+    const order = orders[idx];
+    $('modalOrderId').textContent = `Order #${order.id}`;
+    $('modalOrderDate').textContent = order.date;
+    $('modalTimeline').innerHTML = buildTimeline(order.status);
+
+    $('modalItems').innerHTML = order.items.map((i) => `
+      <div class="detail-line-item">
+        <div class="dli-thumb">${i.emoji}</div>
+        <div class="dli-info">
+          <div class="dli-name">${i.name}</div>
+          <div class="dli-qty">Qty ${i.qty}</div>
+        </div>
+        <div class="dli-price">${money(i.price * i.qty)}</div>
+      </div>`).join('');
+
+    const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0);
+    $('modalSubtotal').textContent = money(subtotal);
+    $('modalDeliveryFee').textContent = money(order.deliveryFee);
+    $('modalHandling').textContent = money(order.handling);
+    $('modalTotal').textContent = money(orderTotal(order));
+    $('modalAddress').textContent = order.address;
+    $('modalPayment').textContent = order.payment;
+
+    bootstrap.Modal.getOrCreateInstance($('orderModal')).show();
+  }
+
+  /* ---------- Reorder (sends items to cart page via localStorage) ---------- */
+  function reorderFromModal() {
+    if (currentOrderIdx === null) return;
+    const order = orders[currentOrderIdx];
+    const items = order.items.map((i) => ({
+      id: i.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name: i.name,
+      meta: '',
+      price: i.price,
+      qty: i.qty,
+      emoji: i.emoji
+    }));
+    try {
+      localStorage.setItem('grocery-reorder', JSON.stringify(items));
+    } catch (e) {}
+
+    // show toast then go to cart
+    showToast('Items added to your cart');
+    setTimeout(() => { window.location.href = 'cart.html'; }, 900);
+  }
+
+  /* ---------- Toast ---------- */
+  function showToast(message) {
+    const toast = $('toast');
+    toast.querySelector('span').textContent = message;
+    toast.classList.add('show');
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  /* ---------- Init ---------- */
+  renderList();
+</script>
+
+</body>
+</html>

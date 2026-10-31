@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coupons & Offers - 10 Min Grocery</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; }
+
+  :root {
+    --ink: #16241D; --muted: #6B7A70; --bg: #FCFBF7; --surface: #FFFFFF; --soft: #F3F6EF;
+    --forest: #123524; --forest-2: #1B4332; --lime: #C6F135; --lime-ink: #294011;
+    --coral: #FF6B4A; --on-coral: #FFFFFF; --line: #E7E5DC; --brand: #123524;
+    --tile: linear-gradient(155deg, #EAF3EC, #DCEBDF);
+    --shadow: 0 16px 32px -18px rgba(18, 53, 36, .55);
+    --shadow-lg: 0 26px 50px -24px rgba(18, 53, 36, .6);
+  }
+  body.dark-mode {
+    --ink: #EDEDE7; --muted: #93A398; --bg: #0F1712; --surface: #182019; --soft: #1E2A22;
+    --forest: #2F6B4E; --forest-2: #3A7D5C; --lime-ink: #182B10;
+    --coral: #FF8768; --on-coral: #2B0F08; --line: #263029; --brand: #C6F135;
+    --tile: linear-gradient(155deg, #1F3327, #16241D);
+    --shadow: 0 16px 32px -18px rgba(0, 0, 0, .85);
+    --shadow-lg: 0 26px 50px -24px rgba(0, 0, 0, .9);
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+    transition: background .2s ease, color .2s ease;
+    padding-bottom: 24px;
+    overscroll-behavior-y: none; /* prevent rubber-band chaining */
+  }
+
+  /* ===== FIX 2: body scroll lock (desktop + iOS) ===== */
+  body.modal-open {
+    overflow: hidden;
+    overscroll-behavior-y: none;
+  }
+  /* iOS Safari ignores overflow:hidden on body — use fixed positioning there */
+  body.is-ios.modal-open {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+
+  h1, h2, h3, h5, .navbar-brand { font-family: 'Fredoka', system-ui, sans-serif; }
+  a { text-decoration: none; }
+  button { font-family: inherit; }
+
+  @keyframes bump { 45% { transform: scale(1.35); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes floaty { 50% { transform: translateY(-6px); } }
+  @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+  @keyframes ticketPop { 0% { transform: scale(.94); opacity: .35; } 60% { transform: scale(1.015); } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes pulseRing {
+    0% { box-shadow: 0 0 0 0 rgba(198, 241, 53, .55); }
+    70% { box-shadow: 0 0 0 14px rgba(198, 241, 53, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(198, 241, 53, 0); }
+  }
+  @keyframes confettiPop {
+    0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(.35); opacity: 0; }
+  }
+  @keyframes flashUpdate { 0% { background: rgba(198, 241, 53, .5); } 100% { background: transparent; } }
+
+  /* ---------- Navbar ---------- */
+  .navbar { background: var(--surface) !important; border-bottom: 1px solid var(--line); }
+  .navbar-brand { color: var(--ink); font-size: 1.2rem; font-weight: 600; }
+  .navbar-brand:hover { color: var(--ink); }
+  .brand-icon {
+    width: 36px; height: 36px; display: grid; place-items: center;
+    border-radius: 12px; background: var(--lime); color: #123524; transform: rotate(-8deg);
+  }
+  .brand-green { position: relative; z-index: 0; color: var(--ink); }
+  .brand-green::after {
+    content: ''; position: absolute; left: -3px; right: -3px; bottom: 3px;
+    height: 9px; background: var(--lime); opacity: .75; z-index: -1; border-radius: 4px;
+  }
+  body.dark-mode .brand-green { color: var(--lime); }
+  body.dark-mode .brand-green::after { display: none; }
+
+  .nav-icon {
+    position: relative; width: 40px; height: 40px; display: grid; place-items: center;
+    border: 1.5px solid var(--line); border-radius: 50%;
+    background: var(--surface); color: var(--ink); font-size: 1.05rem; transition: background .15s;
+  }
+  .nav-icon:hover { background: var(--soft); color: var(--ink); }
+  .nav-badge {
+    position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px;
+    display: grid; place-items: center; border-radius: 999px;
+    background: var(--coral); color: var(--on-coral); font-size: .65rem; font-weight: 800;
+  }
+
+  /* ---------- Page ---------- */
+  .page-wrap { max-width: 920px; margin: auto; animation: fadeUp .4s ease both; }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    color: var(--muted); font-size: .85rem; font-weight: 600;
+  }
+  .back-link:hover { color: var(--brand); }
+
+  .page-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+  .page-head h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 600; }
+  .count-chip {
+    padding: 4px 12px; border-radius: 999px; background: rgba(198, 241, 53, .4); color: #123524;
+    font-size: .76rem; font-weight: 700;
+  }
+  body.dark-mode .count-chip { background: rgba(198, 241, 53, .14); color: var(--lime); }
+  .page-sub { margin: 0 0 20px; color: var(--muted); font-size: .9rem; }
+
+  .section-title { display: flex; align-items: center; gap: 8px; margin: 26px 0 12px; font-size: 1.05rem; font-weight: 600; }
+  .section-title i { color: var(--brand); }
+
+  /* ---------- Delivery detail ---------- */
+  .d-row {
+    display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; padding: 14px;
+    border: 1px solid var(--line); border-radius: 18px; background: var(--surface);
+  }
+  .d-icon { flex: 0 0 40px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--tile); color: var(--brand); font-size: 1.05rem; }
+  .d-main { flex: 1; min-width: 0; }
+  .d-label { display: block; margin-bottom: 2px; color: var(--muted); font-size: .72rem; font-weight: 600; }
+  .field-display { font-size: .92rem; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+  .field-input {
+    width: 100%; padding: 8px 10px; border: 1.5px solid var(--forest); border-radius: 12px;
+    background: var(--bg); color: var(--ink); font-family: 'Inter'; font-size: .92rem; resize: none;
+  }
+  .field-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(198, 241, 53, .35); }
+  .edit-pencil {
+    flex: 0 0 34px; width: 34px; height: 34px; display: grid; place-items: center;
+    border: 1.5px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); font-size: .85rem;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .edit-pencil:hover { background: var(--soft); }
+  .edit-pencil.editing { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+
+  /* ================= WALLET / APPLIED COUPON HERO ================= */
+  .wallet {
+    position: relative;
+    border: 1.5px solid var(--line);
+    border-radius: 26px;
+    background: var(--surface);
+    padding: 22px;
+    transition: border-color .25s, background .25s, box-shadow .25s;
+  }
+  .wallet.is-empty {
+    border-style: dashed;
+    text-align: center;
+    padding: 30px 22px 28px;
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(198, 241, 53, .14), transparent 62%),
+      var(--surface);
+  }
+  .wallet-illus {
+    width: 74px; height: 74px; margin: 0 auto 14px;
+    display: grid; place-items: center; font-size: 2.1rem;
+    border-radius: 24px; background: var(--tile);
+    animation: floaty 3.4s ease-in-out infinite;
+  }
+  .wallet-h { margin: 0 0 6px; font-size: 1.2rem; font-weight: 600; }
+  .wallet-p { margin: 0 0 4px; color: var(--muted); font-size: .86rem; }
+  .wallet-p strong { color: var(--brand); }
+
+  .btn-open-coupons {
+    display: inline-flex; align-items: center; gap: 9px;
+    margin-top: 18px; padding: 14px 28px;
+    border: 0; border-radius: 999px;
+    background: var(--forest); color: #fff;
+    font-size: .93rem; font-weight: 800; letter-spacing: .01em;
+    box-shadow: 0 14px 26px -14px rgba(18, 53, 36, .85);
+    transition: transform .15s, background .15s;
+    animation: pulseRing 2.6s ease-out infinite;
+  }
+  .btn-open-coupons:hover { background: var(--forest-2); transform: translateY(-2px); color: #fff; }
+  .btn-open-coupons:active { transform: scale(.97); }
+
+  .applied-ticket {
+    position: relative;
+    display: flex; align-items: stretch;
+    border-radius: 22px; overflow: hidden;
+    background: linear-gradient(135deg, var(--forest), var(--forest-2));
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+  }
+  .applied-ticket.pop { animation: ticketPop .45s cubic-bezier(.34, 1.56, .64, 1) both; }
+
+  .ticket-stub {
+    position: relative;
+    flex: 0 0 120px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; padding: 18px 10px;
+    background: linear-gradient(160deg, #DAFA66, #B5E71C);
+    color: #294011;
+  }
+  .ticket-stub::after {
+    content: ''; position: absolute; right: 0; top: 14px; bottom: 14px;
+    border-right: 2px dashed rgba(41, 64, 17, .3);
+  }
+  .stub-emoji { font-size: 1.35rem; line-height: 1; }
+  .saved-label { font-size: .6rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; opacity: .75; }
+  .saved-amount { font-family: 'Fredoka'; font-size: 1.75rem; font-weight: 700; line-height: 1; }
+
+  .ticket-body { flex: 1; min-width: 0; padding: 16px 18px; display: flex; flex-direction: column; gap: 7px; }
+  .ticket-row { display: flex; align-items: center; gap: 8px; }
+  .ticket-code {
+    font-family: 'Fredoka'; font-size: .84rem; font-weight: 600; letter-spacing: .07em;
+    padding: 4px 11px; border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px dashed rgba(255, 255, 255, .5);
+  }
+  .ticket-copy, .ticket-remove {
+    width: 28px; height: 28px; display: grid; place-items: center;
+    border: 0; border-radius: 50%;
+    background: rgba(255, 255, 255, .12); color: #fff; font-size: .78rem;
+    transition: background .15s, color .15s;
+  }
+  .ticket-copy:hover { background: rgba(255, 255, 255, .28); }
+  .ticket-remove { margin-left: auto; }
+  .ticket-remove:hover { background: var(--coral); }
+  .ticket-title { margin: 0; font-size: .88rem; font-weight: 600; color: rgba(255, 255, 255, .93); }
+  .ticket-note { margin: 0; font-size: .74rem; color: rgba(255, 255, 255, .62); }
+  .ticket-foot { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .applied-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 999px;
+    background: rgba(198, 241, 53, .2); color: #E2FF8C;
+    font-size: .68rem; font-weight: 800; letter-spacing: .04em;
+  }
+  .btn-change {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 15px; border-radius: 999px;
+    border: 1.5px solid rgba(255, 255, 255, .35);
+    background: transparent; color: #fff;
+    font-size: .76rem; font-weight: 700;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-change:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .65); }
+
+  .confetti-piece {
+    position: absolute; top: 50%; left: 50%; width: 6px; height: 10px; border-radius: 2px;
+    pointer-events: none; animation: confettiPop .95s ease-out forwards; z-index: 6;
+  }
+
+  /* ================= MODAL / BOTTOM SHEET ================= */
+  .sheet-backdrop {
+    position: fixed; inset: 0; z-index: 1040;
+    background: rgba(9, 20, 14, .55);
+    opacity: 0; visibility: hidden;
+    /* ===== FIX 3: backdrop-filter removed from hidden state ===== */
+    transition: opacity .28s ease, visibility .28s ease;
+  }
+  .sheet-backdrop.show {
+    opacity: 1; visibility: visible;
+    /* Blur only applied while visible — avoids constant repaints */
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+
+  .sheet {
+    position: fixed; z-index: 1050;
+    left: 50%; bottom: 0;
+    width: min(620px, 100%);
+    max-height: 90dvh;
+    display: flex; flex-direction: column;
+    background: var(--surface); color: var(--ink);
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -24px 60px -20px rgba(0, 0, 0, .5);
+    transform: translate(-50%, 102%);
+    /* ===== FIX 4: hide completely + delay visibility so slide-out animates ===== */
+    visibility: hidden;
+    pointer-events: none;
+    will-change: transform;
+    transition: transform .38s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .38s;
+    overflow: hidden;
+  }
+  .sheet.show {
+    transform: translate(-50%, 0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform .38s cubic-bezier(.22, 1, .36, 1), visibility 0s;
+  }
+
+  @media (min-width: 576px) {
+    .sheet {
+      top: 50%; bottom: auto;
+      max-height: min(740px, 86vh);
+      border-radius: 28px;
+      opacity: 0;
+      transform: translate(-50%, -44%) scale(.97);
+      transition: transform .32s cubic-bezier(.22, 1, .36, 1), opacity .26s ease, visibility 0s linear .32s;
+    }
+    .sheet.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      transition: transform .32s cubic-bezier(.22, 1, .36, 1), opacity .26s ease, visibility 0s;
+    }
+  }
+
+  .sheet-handle { display: none; }
+  @media (max-width: 575.98px) {
+    .sheet-handle { display: block; width: 44px; height: 5px; border-radius: 999px; background: var(--line); margin: 10px auto 0; }
+  }
+
+  .sheet-head { display: flex; align-items: flex-start; gap: 12px; padding: 18px 20px 10px; }
+  .sheet-head h3 { margin: 0; font-size: 1.18rem; font-weight: 600; }
+  .sheet-head p { margin: 3px 0 0; font-size: .78rem; color: var(--muted); }
+  .sheet-close {
+    margin-left: auto; flex: 0 0 34px;
+    width: 34px; height: 34px; display: grid; place-items: center;
+    border: 1.5px solid var(--line); border-radius: 50%;
+    background: transparent; color: var(--ink); font-size: .85rem;
+    transition: background .15s, transform .15s;
+  }
+  .sheet-close:hover { background: var(--soft); transform: rotate(90deg); }
+
+  .coupon-search { position: relative; margin: 6px 20px 12px; }
+  .coupon-search i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .coupon-search input {
+    width: 100%; height: 46px; padding: 0 16px 0 44px;
+    border: 1.5px solid var(--line); border-radius: 999px;
+    background: var(--bg); color: var(--ink); font-size: .9rem; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .coupon-search input::placeholder { color: var(--muted); }
+  .coupon-search input:focus { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(198, 241, 53, .35); }
+
+  .sheet-body {
+    flex: 1; min-height: 0;
+    overflow-y: auto; overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 20px 18px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  /* --- coupon row inside modal --- */
+  .coupon-item {
+    position: relative;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--line); border-radius: 18px;
+    background: var(--surface);
+    cursor: pointer;
+    transition: border-color .18s, background .18s, transform .15s, box-shadow .18s;
+  }
+  .coupon-item:hover { border-color: var(--muted); transform: translateY(-1px); }
+  .coupon-item:focus-visible { outline: 3px solid rgba(198, 241, 53, .6); outline-offset: 2px; }
+  .coupon-item.selected {
+    border-color: var(--forest);
+    background: linear-gradient(180deg, rgba(198, 241, 53, .13), rgba(198, 241, 53, .03));
+    box-shadow: 0 12px 26px -18px rgba(18, 53, 36, .8);
+  }
+  body.dark-mode .coupon-item.selected { border-color: var(--lime); }
+  .coupon-item.locked { opacity: .5; cursor: not-allowed; }
+  .coupon-item.locked:hover { transform: none; border-color: var(--line); }
+  .coupon-item.shake { animation: shake .4s ease; }
+
+  .ci-check {
+    flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--line);
+    display: grid; place-items: center;
+    color: transparent; font-size: .68rem;
+    transition: background .18s, border-color .18s, color .18s, transform .18s;
+  }
+  .coupon-item.selected .ci-check { background: var(--forest); border-color: var(--forest); color: #fff; transform: scale(1.08); }
+  body.dark-mode .coupon-item.selected .ci-check { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+
+  .ci-emoji {
+    flex: 0 0 44px; width: 44px; height: 44px; border-radius: 14px;
+    display: grid; place-items: center; font-size: 1.25rem;
+    background: var(--tile);
+  }
+
+  .ci-body { flex: 1; min-width: 0; }
+  .ci-code {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: 'Fredoka'; font-size: .82rem; font-weight: 600; letter-spacing: .06em;
+    color: var(--brand);
+  }
+  .ci-copy {
+    border: 0; background: transparent; padding: 2px 3px;
+    color: var(--muted); font-size: .72rem; line-height: 1;
+    transition: color .15s, transform .15s;
+  }
+  .ci-copy:hover { color: var(--coral); transform: scale(1.15); }
+  .ci-badge {
+    display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 999px;
+    font-size: .56rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    background: var(--coral); color: var(--on-coral);
+    vertical-align: middle;
+  }
+  .ci-badge.best { background: var(--lime); color: #294011; }
+  .ci-title { display: block; margin: 3px 0 5px; font-size: .8rem; color: var(--ink); }
+  .ci-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: .68rem; font-weight: 600; color: var(--muted); }
+  .ci-meta i { color: var(--brand); }
+  .ci-warn { color: var(--coral); font-weight: 800; }
+
+  .ci-right { flex: 0 0 auto; text-align: right; display: flex; flex-direction: column; gap: 1px; }
+  .ci-disc { font-family: 'Fredoka'; font-size: 1.08rem; font-weight: 700; color: var(--brand); line-height: 1.1; }
+  .ci-off { font-size: .58rem; font-weight: 800; letter-spacing: .09em; color: var(--muted); }
+
+  .no-coupons { display: none; text-align: center; padding: 36px 20px; color: var(--muted); }
+  .no-coupons.show { display: block; }
+  .no-coupons .emoji { font-size: 2.2rem; margin-bottom: 8px; }
+  .no-coupons h5 { font-size: 1rem; margin-bottom: 4px; color: var(--ink); }
+  .no-coupons p { margin: 0; font-size: .82rem; }
+
+  .sheet-foot {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .foot-info { display: flex; flex-direction: column; min-width: 0; }
+  .foot-info .lbl { font-size: .72rem; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .foot-info .val { font-family: 'Fredoka'; font-size: 1.05rem; font-weight: 600; color: var(--brand); }
+  .btn-apply-selected {
+    margin-left: auto; flex: 0 0 auto;
+    min-width: 132px; height: 48px; padding: 0 24px;
+    border: 0; border-radius: 999px;
+    background: var(--forest); color: #fff;
+    font-size: .9rem; font-weight: 800;
+    transition: transform .12s, background .15s, opacity .2s;
+  }
+  .btn-apply-selected:disabled { opacity: .35; cursor: not-allowed; }
+  .btn-apply-selected:not(:disabled):hover { background: var(--forest-2); color: #fff; }
+  .btn-apply-selected:not(:disabled):active { transform: scale(.97); }
+
+  /* ---------- Order summary ---------- */
+  .bill-card { padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 26px; margin-top: 8px; }
+  .bill-card h2 { margin: 0 0 14px; font-size: 1.15rem; font-weight: 600; }
+
+  .saved-banner {
+    display: none; align-items: center; gap: 9px;
+    margin: 0 0 16px; padding: 11px 15px; border-radius: 14px;
+    background: linear-gradient(100deg, rgba(198, 241, 53, .3), rgba(198, 241, 53, .07));
+    color: var(--forest); font-size: .8rem; font-weight: 700;
+    animation: fadeUp .3s ease both;
+  }
+  body.dark-mode .saved-banner { color: var(--lime); }
+  .saved-banner.show { display: flex; }
+  .saved-banner i { font-size: 1rem; }
+
+  .bill-coupon-cta {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    margin-bottom: 18px; padding: 13px 16px;
+    border: 1.5px dashed var(--line); border-radius: 16px;
+    background: transparent; color: var(--ink);
+    font-size: .85rem; font-weight: 700; text-align: left;
+    transition: border-color .18s, background .18s;
+  }
+  .bill-coupon-cta:hover { border-color: var(--forest); background: var(--soft); }
+  .bill-coupon-cta .lead-icon { color: var(--brand); font-size: 1rem; }
+  .bill-coupon-cta .chev { margin-left: auto; color: var(--muted); }
+
+  .bill-row { display: flex; justify-content: space-between; margin-bottom: 9px; color: var(--muted); font-size: .88rem; border-radius: 8px; transition: background .2s; }
+  .bill-row.flash { animation: flashUpdate .9s ease; }
+  .bill-row.coupon-row { color: var(--forest); font-weight: 700; align-items: center; }
+  body.dark-mode .bill-row.coupon-row { color: var(--lime); }
+  .remove-coupon {
+    margin-left: 8px; padding: 2px 9px;
+    border: 0; border-radius: 999px;
+    background: rgba(255, 107, 74, .16); color: var(--coral);
+    font-size: .67rem; font-weight: 800; cursor: pointer;
+    transition: background .15s;
+  }
+  .remove-coupon:hover { background: rgba(255, 107, 74, .3); }
+  .bill-row.total {
+    margin: 14px 0 0; padding-top: 14px; border-top: 1px dashed var(--line);
+    color: var(--ink); font-size: 1.05rem; font-weight: 800;
+  }
+  .bill-row.total span:last-child { font-family: 'Fredoka'; font-size: 1.3rem; color: var(--brand); }
+
+  .btn-place-order {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 52px; margin-top: 16px;
+    border: 0; border-radius: 999px; background: var(--forest); color: #fff; font-size: .95rem; font-weight: 700;
+    transition: background .15s, transform .12s;
+  }
+  .btn-place-order:hover { background: var(--forest-2); color: #fff; transform: translateY(-2px); }
+  .bill-note { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 12px 0 0; color: var(--muted); font-size: .76rem; }
+  .bill-note i { color: var(--brand); }
+
+  /* ---------- Toast ---------- */
+  .toast-message {
+    position: fixed; left: 50%; z-index: 2000;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    max-width: calc(100vw - 32px);
+    display: flex; align-items: center; gap: 9px;
+    padding: 12px 20px; border-radius: 999px;
+    background: var(--lime); color: #294011;
+    font-size: .85rem; font-weight: 700;
+    box-shadow: 0 16px 28px -12px rgba(0, 0, 0, .5);
+    opacity: 0; pointer-events: none; transform: translate(-50%, 30px);
+    transition: opacity .25s, transform .25s;
+  }
+  .toast-message.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast-message.error { background: var(--coral); color: var(--on-coral); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 575.98px) {
+    .navbar-brand { font-size: 1rem; }
+    .applied-ticket { flex-direction: column; }
+    .ticket-stub {
+      flex: 0 0 auto; flex-direction: row; gap: 10px;
+      padding: 12px 16px; justify-content: center;
+    }
+    .ticket-stub::after {
+      right: 16px; left: 16px; top: auto; bottom: 0;
+      border-right: 0; border-bottom: 2px dashed rgba(41, 64, 17, .28);
+    }
+    .saved-amount { font-size: 1.35rem; }
+    .saved-label { order: -1; }
+    .ci-emoji { flex-basis: 38px; width: 38px; height: 38px; font-size: 1.05rem; border-radius: 12px; }
+    .ci-disc { font-size: .98rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="scrollbar.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar sticky-top">
+  <div class="container py-2">
+    <div class="d-flex align-items-center w-100">
+      <a href="index.html" class="navbar-brand fw-bold d-flex align-items-center gap-2">
+        <span class="brand-icon"><i class="bi bi-leaf-fill"></i></span>
+        <span>10 Min <span class="brand-green">Grocery</span></span>
+      </a>
+      <div class="ms-auto d-flex gap-2">
+        <a href="cart.html" class="nav-icon" title="Cart">
+          <i class="bi bi-cart3"></i>
+          <span class="nav-badge" id="navCartCount">0</span>
+        </a>
+        <button class="nav-icon" id="themeToggle" type="button" title="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+        <a href="profile.html" class="nav-icon" title="Profile"><i class="bi bi-person"></i></a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="page-wrap">
+
+    <a href="cart.html" class="back-link"><i class="bi bi-arrow-left"></i> Back to cart</a>
+
+    <div class="page-head">
+      <h1>Coupons &amp; Offers</h1>
+      <span class="count-chip" id="couponCountLabel">6 available</span>
+    </div>
+    <p class="page-sub">Tap <strong>Apply Coupon</strong> to browse every offer and pick the best one for your order.</p>
+
+    <!-- ============ Applied / empty coupon wallet ============ -->
+    <section class="wallet is-empty" id="wallet" aria-live="polite">
+
+      <div id="walletEmpty">
+        <div class="wallet-illus">🎟️</div>
+        <h3 class="wallet-h">No coupon applied yet</h3>
+        <p class="wallet-p"><strong id="availCount">6</strong> offers waiting · save up to <strong id="maxSave">₹0</strong> on this order</p>
+        <button type="button" class="btn-open-coupons" id="openCouponBtn">
+          <i class="bi bi-ticket-perforated-fill"></i> Apply Coupon
+        </button>
+      </div>
+
+      <div id="walletApplied" class="d-none">
+        <div class="applied-ticket" id="appliedTicket">
+          <div class="ticket-stub">
+            <span class="stub-emoji" id="stubEmoji">🎉</span>
+            <span class="saved-label">You saved</span>
+            <span class="saved-amount" id="stubAmount">₹0</span>
+          </div>
+          <div class="ticket-body">
+            <div class="ticket-row">
+              <span class="ticket-code" id="ticketCode">CODE</span>
+              <button type="button" class="ticket-copy" id="ticketCopy" title="Copy code" aria-label="Copy coupon code"><i class="bi bi-copy"></i></button>
+              <button type="button" class="ticket-remove" id="ticketRemove" title="Remove coupon" aria-label="Remove coupon"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <p class="ticket-title" id="ticketTitle">Coupon title</p>
+            <p class="ticket-note" id="ticketNote">Discount applied</p>
+            <div class="ticket-foot">
+              <span class="applied-pill"><i class="bi bi-check-circle-fill"></i> Applied</span>
+              <button type="button" class="btn-change" id="changeCouponBtn"><i class="bi bi-arrow-repeat"></i> Change</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Delivery detail ============ -->
+    <h2 class="section-title"><i class="bi bi-geo-alt"></i> Delivering to</h2>
+
+    <div class="d-row">
+      <div class="d-icon"><i class="bi bi-person"></i></div>
+      <div class="d-main">
+        <span class="d-label">Deliver to</span>
+        <div class="field-display" id="nameDisplay">Aarav Mehta</div>
+      </div>
+    </div>
+
+    <div class="d-row">
+      <div class="d-icon"><i class="bi bi-geo-alt"></i></div>
+      <div class="d-main">
+        <span class="d-label">Address</span>
+        <div class="field-display" id="addressDisplay"></div>
+        <textarea class="field-input d-none" id="addressInput" rows="2"></textarea>
+      </div>
+      <button type="button" class="edit-pencil" id="addressBtn" onclick="toggleEdit('address')" aria-label="Edit address"><i class="bi bi-pencil"></i></button>
+    </div>
+
+    <div class="d-row">
+      <div class="d-icon"><i class="bi bi-telephone"></i></div>
+      <div class="d-main">
+        <span class="d-label">Phone number</span>
+        <div class="field-display" id="phoneDisplay"></div>
+        <input class="field-input d-none" id="phoneInput" type="tel">
+      </div>
+      <button type="button" class="edit-pencil" id="phoneBtn" onclick="toggleEdit('phone')" aria-label="Edit phone number"><i class="bi bi-pencil"></i></button>
+    </div>
+
+    <!-- ============ Order summary ============ -->
+    <div class="bill-card">
+      <h2>Order summary</h2>
+
+      <div class="saved-banner" id="savedBanner">
+        <i class="bi bi-piggy-bank-fill"></i><span id="savedBannerText"></span>
+      </div>
+
+      <button type="button" class="bill-coupon-cta" id="billCouponBtn">
+        <i class="bi bi-ticket-perforated-fill lead-icon"></i>
+        <span>Apply Coupon</span>
+        <i class="bi bi-chevron-right chev"></i>
+      </button>
+
+      <div class="bill-row"><span>Item total</span><span id="billSubtotal">₹0</span></div>
+      <div class="bill-row" id="couponRow" style="display:none;"></div>
+      <div class="bill-row"><span>Delivery fee</span><span id="billDelivery">₹0</span></div>
+      <div class="bill-row"><span>Handling charge</span><span id="billHandling">₹0</span></div>
+      <div class="bill-row total"><span>To pay</span><span id="billTotal">₹0</span></div>
+
+      <a href="cart.html" class="btn-place-order">Proceed to cart <i class="bi bi-arrow-right"></i></a>
+      <p class="bill-note"><i class="bi bi-lightning-charge-fill"></i> Applied coupons carry over to checkout</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- ============ Coupon modal / bottom sheet ============ -->
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+<div class="sheet" id="couponSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
+  <div class="sheet-handle"></div>
+
+  <header class="sheet-head">
+    <div>
+      <h3 id="sheetTitle">Available Coupons</h3>
+      <p><span id="sheetCount">6</span> offers · up to <span id="sheetMax">30%</span> off</p>
+    </div>
+    <button type="button" class="sheet-close" id="sheetClose" aria-label="Close coupons"><i class="bi bi-x-lg"></i></button>
+  </header>
+
+  <div class="coupon-search">
+    <i class="bi bi-search"></i>
+    <input id="couponSearch" type="search" placeholder="Search by code or title…" autocomplete="off">
+  </div>
+
+  <div class="sheet-body" id="couponList"></div>
+
+  <div class="no-coupons" id="noCoupons">
+    <div class="emoji">🔍</div>
+    <h5>No coupons found</h5>
+    <p>Try a different code or keyword.</p>
+  </div>
+
+  <footer class="sheet-foot">
+    <div class="foot-info">
+      <span class="lbl" id="footLabel">Select a coupon to apply</span>
+      <span class="val" id="footValue">—</span>
+    </div>
+    <button type="button" class="btn-apply-selected" id="applySelectedBtn" disabled>Apply</button>
+  </footer>
+</div>
+
+<div id="toast" class="toast-message"><i class="bi bi-check-circle-fill"></i><span>Coupon applied</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => `₹${Math.round(n)}`;
+
+  /* ---------- Dark mode ---------- */
+  const themeToggle = $('themeToggle');
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('grocery-theme'); } catch (e) {}
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (savedTheme ? savedTheme === 'dark' : prefersDark) document.body.classList.add('dark-mode');
+
+  function updateThemeIcon() {
+    themeToggle.innerHTML = document.body.classList.contains('dark-mode')
+      ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
+  }
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    try { localStorage.setItem('grocery-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); } catch (e) {}
+    updateThemeIcon();
+  });
+  updateThemeIcon();
+
+  /* ============================================================
+     FIX 5: proper body scroll lock (desktop + iOS)
+     ============================================================ */
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) document.body.classList.add('is-ios');
+
+  let savedScrollY = 0;
+
+  function lockBodyScroll() {
+    savedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.classList.add('modal-open');
+    if (isIOS) {
+      // iOS needs position:fixed to actually freeze the background
+      document.body.style.top = `-${savedScrollY}px`;
+    }
+  }
+
+  function unlockBodyScroll() {
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    if (isIOS) {
+      // restore exact scroll position after un-fixing the body
+      window.scrollTo(0, savedScrollY);
+    }
+  }
+
+  /* ---------- Delivery details ---------- */
+  let profile = {};
+  try { profile = JSON.parse(localStorage.getItem('grocery-profile')) || {}; } catch (e) {}
+  $('nameDisplay').textContent = profile.name || 'Aarav Mehta';
+  $('addressDisplay').textContent = $('addressInput').value = '204, Lakeview Apartments, 5th Cross, Singanallur, Coimbatore – 641005';
+  $('phoneDisplay').textContent = $('phoneInput').value = profile.phone || '+91 98765 43210';
+
+  function isEditing(field) { return !$(field + 'Input').classList.contains('d-none'); }
+  function toggleEdit(field) {
+    if (isEditing(field)) return commitEdit(field);
+    $(field + 'Display').classList.add('d-none');
+    const input = $(field + 'Input');
+    input.classList.remove('d-none');
+    input.focus(); input.select();
+    const btn = $(field + 'Btn');
+    btn.classList.add('editing');
+    btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+    btn.setAttribute('aria-label', 'Save ' + field);
+  }
+  function commitEdit(field) {
+    if (!isEditing(field)) return;
+    const display = $(field + 'Display'), input = $(field + 'Input'), btn = $(field + 'Btn');
+    const value = input.value.trim();
+    if (value) display.textContent = value; else input.value = display.textContent;
+    input.classList.add('d-none');
+    display.classList.remove('d-none');
+    btn.classList.remove('editing');
+    btn.innerHTML = '<i class="bi bi-pencil"></i>';
+    btn.setAttribute('aria-label', 'Edit ' + field);
+  }
+  ['address', 'phone'].forEach((field) => {
+    $(field + 'Input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commitEdit(field); }
+    });
+  });
+
+  /* ---------- Order constants ---------- */
+  const ITEM_SUBTOTAL = 482;
+  const DELIVERY_FEE = 15;
+  const HANDLING = 6;
+
+  /* ---------- Coupons ---------- */
+  const coupons = [
+    { id: 'fresh25',   code: 'FRESH25',    title: '25% off fruits & veggies', emoji: '🥬', type: 'percent', value: 25, maxDiscount: 100, minOrder: 299, expiry: '15 Oct', tag: null },
+    { id: 'flat50',    code: 'FLAT50',     title: 'Flat ₹50 off your order',  emoji: '💸', type: 'flat',    value: 50, minOrder: 199, expiry: '20 Oct', tag: null },
+    { id: 'freedel',   code: 'FREEDEL',    title: 'Zero delivery fee',        emoji: '🛵', type: 'freedel', value: 0,  minOrder: 149, expiry: '31 Oct', tag: null },
+    { id: 'welcome100',code: 'WELCOME100', title: 'Flat ₹100 off — first order', emoji: '🎉', type: 'flat', value: 100, minOrder: 499, expiry: '30 Nov', tag: 'New here' },
+    { id: 'save15',    code: 'SAVE15',     title: '15% off daily essentials', emoji: '🛒', type: 'percent', value: 15, maxDiscount: 60, minOrder: 249, expiry: '18 Oct', tag: null },
+    { id: 'weekend30', code: 'WEEKEND30',  title: '30% off this weekend',     emoji: '🎈', type: 'percent', value: 30, maxDiscount: 150, minOrder: 399, expiry: '5 Oct', tag: 'Expiring soon' }
+  ];
+
+  const sheet = $('couponSheet');
+  const backdrop = $('sheetBackdrop');
+  const listEl = $('couponList');
+  const searchInput = $('couponSearch');
+  const applyBtn = $('applySelectedBtn');
+
+  let appliedId = null;
+  let selectedId = null;
+
+  /* ---------- Helpers ---------- */
+  const isEligible = (c) => ITEM_SUBTOTAL >= c.minOrder;
+
+  function discountFor(c) {
+    if (c.type === 'percent') return Math.min(Math.round(ITEM_SUBTOTAL * c.value / 100), c.maxDiscount ?? Infinity);
+    if (c.type === 'flat') return c.value;
+    return 0;
+  }
+  function savingsFor(c) { return c.type === 'freedel' ? DELIVERY_FEE : discountFor(c); }
+
+  const eligibleCoupons = coupons.filter(isEligible);
+  const bestId = eligibleCoupons.length
+    ? eligibleCoupons.reduce((a, b) => (savingsFor(b) > savingsFor(a) ? b : a)).id
+    : null;
+  const maxSaving = eligibleCoupons.length ? Math.max(...eligibleCoupons.map(savingsFor)) : 0;
+
+  /* ---------- Modal list rendering ---------- */
+  function itemHTML(c) {
+    const eligible = isEligible(c);
+    const selected = selectedId === c.id;
+    const disc = c.type === 'percent' ? `${c.value}%` : c.type === 'flat' ? money(c.value) : 'FREE';
+    const off = c.type === 'freedel' ? 'DELIVERY' : 'OFF';
+
+    let badge = '';
+    if (c.id === bestId) badge = '<span class="ci-badge best">Best value</span>';
+    else if (c.tag) badge = `<span class="ci-badge">${c.tag}</span>`;
+
+    const warn = eligible ? '' : `<span class="ci-warn">Add ${money(c.minOrder - ITEM_SUBTOTAL)} more</span>`;
+
+    return `
+      <div class="coupon-item ${selected ? 'selected' : ''} ${eligible ? '' : 'locked'}"
+           data-id="${c.id}" role="button" tabindex="${eligible ? '0' : '-1'}"
+           aria-pressed="${selected}" aria-disabled="${!eligible}">
+        <span class="ci-check"><i class="bi bi-check-lg"></i></span>
+        <span class="ci-emoji">${c.emoji}</span>
+        <span class="ci-body">
+          <span class="ci-code">${c.code}
+            <button type="button" class="ci-copy" data-copy="${c.code}" aria-label="Copy code ${c.code}"><i class="bi bi-copy"></i></button>
+          </span>${badge}
+          <span class="ci-title">${c.title}</span>
+          <span class="ci-meta">
+            <span><i class="bi bi-bag-check"></i> Min ${money(c.minOrder)}</span>
+            <span><i class="bi bi-calendar-event"></i> Till ${c.expiry}</span>
+            ${warn}
+          </span>
+        </span>
+        <span class="ci-right">
+          <span class="ci-disc">${disc}</span>
+          <span class="ci-off">${off}</span>
+        </span>
+      </div>`;
+  }
+
+  function renderList() {
+    const q = (searchInput.value || '').trim().toLowerCase();
+    const filtered = coupons.filter(
+      (c) => c.code.toLowerCase().includes(q) || c.title.toLowerCase().includes(q)
+    );
+    listEl.innerHTML = filtered.map(itemHTML).join('');
+    $('noCoupons').classList.toggle('show', filtered.length === 0);
+  }
+
+  function updateFoot() {
+    const c = coupons.find((x) => x.id === selectedId);
+    if (!c) {
+      $('footLabel').textContent = 'Select a coupon to apply';
+      $('footValue').textContent = '—';
+      applyBtn.disabled = true;
+      return;
+    }
+    $('footLabel').textContent = `${c.code} selected`;
+    $('footValue').textContent = `Save ${money(savingsFor(c))}`;
+    applyBtn.disabled = false;
+  }
+
+  /* ---------- Open / close (uses lockBodyScroll/unlockBodyScroll) ---------- */
+  function openSheet() {
+    selectedId = appliedId;
+    searchInput.value = '';
+    renderList();
+    updateFoot();
+    backdrop.classList.add('show');
+    sheet.classList.add('show');
+    sheet.setAttribute('aria-hidden', 'false');
+    lockBodyScroll();                                  // ← replaces overflow:hidden
+    setTimeout(() => { if (window.innerWidth >= 576) searchInput.focus(); }, 320);
+  }
+
+  function closeSheet() {
+    backdrop.classList.remove('show');
+    sheet.classList.remove('show');
+    sheet.setAttribute('aria-hidden', 'true');
+    unlockBodyScroll();                                // ← replaces overflow:''
+  }
+
+  /* ---------- Apply / remove ---------- */
+  function applySelected() {
+    if (!selectedId) return;
+    const c = coupons.find((x) => x.id === selectedId);
+    if (!c || !isEligible(c)) return;
+
+    const changed = appliedId !== c.id;
+    appliedId = c.id;
+    closeSheet();
+    renderWallet(changed);
+    recalc();
+
+    if (changed) {
+      showToast(c.type === 'freedel'
+        ? `${c.code} applied — delivery is free!`
+        : `${c.code} applied — you saved ${money(savingsFor(c))}!`);
+    }
+  }
+
+  function removeCoupon() {
+    const c = coupons.find((x) => x.id === appliedId);
+    appliedId = null;
+    renderWallet(false);
+    recalc();
+    showToast(c ? `${c.code} removed` : 'Coupon removed');
+  }
+
+  /* ---------- Wallet card ---------- */
+  function renderWallet(animate) {
+    const c = coupons.find((x) => x.id === appliedId);
+    const wallet = $('wallet');
+
+    if (!c) {
+      wallet.classList.add('is-empty');
+      $('walletEmpty').classList.remove('d-none');
+      $('walletApplied').classList.add('d-none');
+      return;
+    }
+
+    wallet.classList.remove('is-empty');
+    $('walletEmpty').classList.add('d-none');
+    $('walletApplied').classList.remove('d-none');
+
+    $('stubEmoji').textContent = c.emoji;
+    $('stubAmount').textContent = money(savingsFor(c));
+    $('ticketCode').textContent = c.code;
+    $('ticketTitle').textContent = c.title;
+    $('ticketNote').textContent = c.type === 'freedel'
+      ? 'Delivery fee waived on this order'
+      : `Instant discount of ${money(discountFor(c))} applied`;
+
+    const ticket = $('appliedTicket');
+    if (animate) {
+      ticket.classList.remove('pop');
+      void ticket.offsetWidth;
+      ticket.classList.add('pop');
+      setTimeout(() => burstConfetti(ticket), 80);
+    }
+  }
+
+  /* ---------- Bill ---------- */
+  function flashBillRows() {
+    document.querySelectorAll('.bill-row').forEach((row) => {
+      row.classList.remove('flash');
+      void row.offsetWidth;
+      row.classList.add('flash');
+    });
+  }
+
+  function recalc(animate = true) {
+    const c = coupons.find((x) => x.id === appliedId);
+    const freeDel = !!c && c.type === 'freedel';
+    const delivery = freeDel ? 0 : DELIVERY_FEE;
+    const discount = c ? discountFor(c) : 0;
+    const total = Math.max(0, ITEM_SUBTOTAL - discount + delivery + HANDLING);
+
+    $('billSubtotal').textContent = money(ITEM_SUBTOTAL);
+    $('billDelivery').textContent = freeDel ? 'FREE' : money(delivery);
+    $('billHandling').textContent = money(HANDLING);
+    $('billTotal').textContent = money(total);
+
+    const row = $('couponRow');
+    const banner = $('savedBanner');
+    const cta = $('billCouponBtn');
+
+    if (c) {
+      row.style.display = 'flex';
+      row.className = 'bill-row coupon-row';
+      const amount = freeDel ? 'Free delivery' : `-${money(discount)}`;
+      row.innerHTML = `<span>Coupon <strong>${c.code}</strong>
+          <button type="button" class="remove-coupon" id="removeCoupon">Remove</button></span>
+        <span>${amount}</span>`;
+      $('removeCoupon').addEventListener('click', removeCoupon);
+
+      $('savedBannerText').textContent = `You're saving ${money(savingsFor(c))} on this order 🎉`;
+      banner.classList.add('show');
+      cta.style.display = 'none';
+    } else {
+      row.style.display = 'none';
+      row.innerHTML = '';
+      banner.classList.remove('show');
+      cta.style.display = 'flex';
+    }
+
+    if (animate) flashBillRows();
+  }
+
+  /* ---------- Confetti ---------- */
+  function burstConfetti(originEl) {
+    const colors = ['#C6F135', '#FFFFFF', '#FF6B4A', '#B5E71C'];
+    for (let i = 0; i < 18; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 55 + Math.random() * 70;
+      piece.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      piece.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+      piece.style.setProperty('--rot', `${(Math.random() * 360 - 180)}deg`);
+      piece.style.background = colors[i % colors.length];
+      originEl.appendChild(piece);
+      setTimeout(() => piece.remove(), 1000);
+    }
+  }
+
+  /* ---------- Toast ---------- */
+  function showToast(message, isError = false) {
+    const toast = $('toast');
+    toast.classList.toggle('error', isError);
+    toast.querySelector('i').className = isError ? 'bi bi-exclamation-circle-fill' : 'bi bi-check-circle-fill';
+    toast.querySelector('span').textContent = message;
+    toast.classList.add('show');
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  /* ---------- Copy code ---------- */
+  function copyCode(code, btn) {
+    navigator.clipboard?.writeText(code).catch(() => {});
+    if (btn) {
+      const icon = btn.querySelector('i');
+      if (icon) {
+        const prev = icon.className;
+        icon.className = 'bi bi-check2';
+        setTimeout(() => { icon.className = prev; }, 1200);
+      }
+    }
+    showToast(`Copied ${code}`);
+  }
+
+  /* ---------- Events ---------- */
+  $('openCouponBtn').addEventListener('click', openSheet);
+  $('billCouponBtn').addEventListener('click', openSheet);
+  $('changeCouponBtn').addEventListener('click', openSheet);
+  $('sheetClose').addEventListener('click', closeSheet);
+  backdrop.addEventListener('click', closeSheet);
+  applyBtn.addEventListener('click', applySelected);
+
+  $('ticketRemove').addEventListener('click', removeCoupon);
+  $('ticketCopy').addEventListener('click', () => {
+    const c = coupons.find((x) => x.id === appliedId);
+    if (c) copyCode(c.code, $('ticketCopy'));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sheet.classList.contains('show')) closeSheet();
+  });
+
+  listEl.addEventListener('click', (e) => {
+    const copyBtn = e.target.closest('[data-copy]');
+    if (copyBtn) {
+      e.stopPropagation();
+      copyCode(copyBtn.dataset.copy, copyBtn);
+      return;
+    }
+    const item = e.target.closest('.coupon-item');
+    if (!item) return;
+    selectItem(item);
+  });
+
+  listEl.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const item = e.target.closest('.coupon-item');
+    if (!item) return;
+    e.preventDefault();
+    selectItem(item);
+  });
+
+  function selectItem(item) {
+    const c = coupons.find((x) => x.id === item.dataset.id);
+    if (!c) return;
+
+    if (!isEligible(c)) {
+      item.classList.remove('shake');
+      void item.offsetWidth;
+      item.classList.add('shake');
+      showToast(`Add ${money(c.minOrder - ITEM_SUBTOTAL)} more to unlock ${c.code}`, true);
+      return;
+    }
+
+    selectedId = selectedId === c.id ? null : c.id;
+    renderList();
+    updateFoot();
+  }
+
+  searchInput.addEventListener('input', renderList);
+
+  /* ---------- Init ---------- */
+  $('couponCountLabel').textContent = `${coupons.length} available`;
+  $('sheetCount').textContent = coupons.length;
+  $('availCount').textContent = coupons.length;
+  $('maxSave').textContent = money(maxSaving);
+  $('sheetMax').textContent = `${Math.max(...coupons.filter(c => c.type === 'percent').map(c => c.value))}%`;
+
+  renderWallet(false);
+  recalc(false);
+</script>
+</body>
+</html>

@@ -7,16 +7,20 @@ using static System.Net.WebRequestMethods;
 
 namespace Mandi.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    [ServiceFilter(typeof(RepositoryExceptionFilterAttribute))]
-    public class AccessController : ApiControllerBase
+    
+    public class AccessController : Controller
     {
-        private readonly IUnitOfWork unitOfWork;
-        public AccessController( )
+        private readonly ILogger<HomeController> _logger;
+
+        public AccessController(ILogger<HomeController> logger)
         {
+            _logger = logger;
         }
-       
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
     }
 }

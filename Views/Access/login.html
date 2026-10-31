@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in — QuickBasket</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+
+<main class="auth">
+
+  <!-- STEP 1: EMAIL -->
+  <section id="emailScreen" class="screen">
+    <div class="content">
+      <h1>Welcome</h1>
+      <p class="description">Enter your email address to continue</p>
+
+      <form id="emailForm">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" class="input" type="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div id="emailMessage" class="message"></div>
+
+        <button class="button" type="submit">Next</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- STEP 2: OTP -->
+  <section id="otpScreen" class="screen hidden">
+    <div class="content">
+      <button id="backButton" class="back" type="button" aria-label="Go back">&#8592;</button>
+
+      <h1>Enter OTP</h1>
+      <p class="description">We've sent a 4 digit code to <span id="emailPreview"></span></p>
+
+      <form id="otpForm">
+        <div class="otp-container">
+          <input class="otp" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="OTP digit 1">
+          <input class="otp" maxlength="1" inputmode="numeric" aria-label="OTP digit 2">
+          <input class="otp" maxlength="1" inputmode="numeric" aria-label="OTP digit 3">
+          <input class="otp" maxlength="1" inputmode="numeric" aria-label="OTP digit 4">
+        </div>
+
+        <div id="otpMessage" class="message"></div>
+
+        <button id="verifyButton" class="button" type="submit" disabled>Verify</button>
+      </form>
+
+      <div class="resend">
+        <button id="resendButton" type="button" disabled>Resend code</button>
+        <span id="timer"> in 00:45</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: PROFILE SETUP -->
+  <section id="profileScreen" class="screen hidden">
+    <div class="content">
+
+      <div id="profileForm">
+        <h1>Complete your profile</h1>
+        <p class="description">Just this once — so we know where to deliver</p>
+
+        <form id="profileFormEl">
+          <div class="field">
+            <label for="fullName">Full name</label>
+            <input id="fullName" class="input" type="text" placeholder="Aarav Mehta" autocomplete="name" required>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input id="phone" class="input" type="tel" placeholder="98765 43210" inputmode="numeric" autocomplete="tel" required>
+          </div>
+
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea id="address" class="input" placeholder="House / flat no., street, area" autocomplete="street-address" required></textarea>
+          </div>
+
+          <div class="field">
+            <label for="pincode">Pincode</label>
+            <input id="pincode" class="input" type="text" placeholder="641005" inputmode="numeric" maxlength="6" autocomplete="postal-code" required>
+          </div>
+
+          <div id="profileMessage" class="message"></div>
+
+          <button id="saveProfileButton" class="button" type="submit" disabled>Save & continue</button>
+        </form>
+      </div>
+
+      <div id="profileSuccess" class="success-view hidden">
+        <div class="success-check">
+          <svg viewBox="0 0 52 52" width="56" height="56">
+            <circle class="success-check-circle" cx="26" cy="26" r="24" fill="none"/>
+            <path class="success-check-mark" fill="none" d="M14 27l7 7 16-16"/>
+          </svg>
+        </div>
+        <h2>You're all set!</h2>
+        <p>Your profile has been saved.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script src="login.js"></script>
+</body>
+</html>

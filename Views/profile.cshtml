@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>My Profile - 10 Min Grocery</title>
+
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; }
+
+    /* ---------- Tokens (same as the homepage) ---------- */
+    :root {
+      --ink: #16241D;
+      --muted: #6B7A70;
+      --bg: #FCFBF7;
+      --surface: #FFFFFF;
+      --soft: #F3F6EF;
+      --forest: #123524;
+      --forest-2: #1B4332;
+      --lime: #C6F135;
+      --lime-ink: #294011;
+      --coral: #FF6B4A;
+      --on-coral: #FFFFFF;
+      --line: #E7E5DC;
+      --brand: #123524;
+      --tile: linear-gradient(155deg, #EAF3EC, #DCEBDF);
+      --hero-a: #123524;
+      --hero-b: #1F5A3F;
+      --shadow: 0 16px 32px -18px rgba(18, 53, 36, .55);
+    }
+
+    body.dark-mode {
+      --ink: #EDEDE7;
+      --muted: #93A398;
+      --bg: #0F1712;
+      --surface: #182019;
+      --soft: #1E2A22;
+      --forest: #2F6B4E;
+      --forest-2: #3A7D5C;
+      --lime-ink: #182B10;
+      --coral: #FF8768;
+      --on-coral: #2B0F08;
+      --line: #263029;
+      --brand: #C6F135;
+      --tile: linear-gradient(155deg, #1F3327, #16241D);
+      --hero-a: #16382A;
+      --hero-b: #24563E;
+      --shadow: 0 16px 32px -18px rgba(0, 0, 0, .85);
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+      transition: background .2s ease, color .2s ease;
+    }
+    h1, h2, h5, .navbar-brand { font-family: 'Fredoka', system-ui, sans-serif; }
+    a { text-decoration: none; }
+
+    @keyframes floaty { 50% { transform: translateY(-6px); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    /* ---------- Navbar ---------- */
+    .navbar { background: var(--surface) !important; border-bottom: 1px solid var(--line); }
+    .navbar-brand { color: var(--ink); font-size: 1.2rem; font-weight: 600; }
+    .navbar-brand:hover { color: var(--ink); }
+    .brand-icon {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 12px; background: var(--lime); color: var(--forest);
+      transform: rotate(-8deg);
+    }
+    .brand-green { position: relative; z-index: 0; color: var(--ink); }
+    .brand-green::after {
+      content: ''; position: absolute; left: -3px; right: -3px; bottom: 3px;
+      height: 9px; background: var(--lime); opacity: .75; z-index: -1; border-radius: 4px;
+    }
+    body.dark-mode .brand-green { color: var(--lime); }
+    body.dark-mode .brand-green::after { display: none; }
+
+    .nav-icon {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border: 1.5px solid var(--line); border-radius: 50%;
+      background: var(--surface); color: var(--ink); font-size: 1.05rem;
+      transition: background .15s;
+    }
+    .nav-icon:hover { background: var(--soft); color: var(--ink); }
+    .nav-icon.current { background: var(--forest); border-color: var(--forest); color: #fff; }
+
+    /* ---------- Page ---------- */
+    .profile-container { max-width: 880px; margin: auto; animation: fadeUp .4s ease both; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      color: var(--muted); font-size: .85rem; font-weight: 600;
+    }
+    .back-link:hover { color: var(--brand); }
+
+    /* ---------- Profile hero ---------- */
+    .profile-hero {
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      padding: 30px;
+      border-radius: 28px; color: #fff;
+      background: linear-gradient(120deg, var(--hero-a), var(--hero-b));
+    }
+    .profile-hero::before {
+      content: ''; position: absolute; right: -80px; top: -110px;
+      width: 320px; height: 320px; border-radius: 50%;
+      border: 2px dashed rgba(198, 241, 53, .35);
+    }
+    .profile-hero::after {
+      content: ''; position: absolute; right: 60px; bottom: -150px;
+      width: 260px; height: 260px; border-radius: 50%;
+      background: rgba(198, 241, 53, .1);
+    }
+    .ph-main { position: relative; z-index: 1; display: flex; align-items: center; gap: 18px; min-width: 0; }
+
+    .ph-avatar {
+      position: relative; flex: 0 0 88px; width: 88px; height: 88px;
+      display: grid; place-items: center;
+      border-radius: 50%; background: var(--lime); color: var(--lime-ink);
+      font-family: 'Fredoka'; font-size: 2rem; font-weight: 600;
+      box-shadow: 0 16px 26px -12px rgba(0, 0, 0, .55);
+    }
+    .ph-avatar::before {
+      content: ''; position: absolute; inset: -7px;
+      border-radius: 50%; border: 2px dashed rgba(198, 241, 53, .6);
+    }
+
+    .ph-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-bottom: 6px; padding: 4px 10px;
+      border: 1px solid rgba(198, 241, 53, .45); border-radius: 999px;
+      color: var(--lime); font-size: .66rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .ph-text h1 {
+      margin: 0 0 2px; font-size: clamp(1.4rem, 3.4vw, 2rem);
+      font-weight: 600; line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+    .ph-text p { margin: 0; color: rgba(255, 255, 255, .72); font-size: .88rem; overflow-wrap: anywhere; }
+
+    .ph-edit {
+      position: relative; z-index: 1; flex: 0 0 auto;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px; border: 0; border-radius: 999px;
+      background: var(--lime); color: var(--lime-ink);
+      font-size: .85rem; font-weight: 700;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .ph-edit:hover { transform: translateY(-2px); box-shadow: 0 12px 22px -10px rgba(198, 241, 53, .8); }
+
+    /* ---------- Sections ---------- */
+    .section-title { margin: 28px 0 12px; font-size: 1.2rem; font-weight: 600; }
+
+    .info-card, .menu-card {
+      overflow: hidden;
+      border: 1px solid var(--line); border-radius: 22px; background: var(--surface);
+    }
+    .info-row {
+      display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .info-row:last-child { border-bottom: 0; }
+    .info-icon, .menu-icon {
+      flex: 0 0 44px; width: 44px; height: 44px;
+      display: grid; place-items: center;
+      border-radius: 14px; background: var(--tile); color: var(--brand); font-size: 1.1rem;
+    }
+    .info-label { display: block; margin-bottom: 2px; color: var(--muted); font-size: .72rem; font-weight: 500; }
+    .info-value { display: block; font-size: .92rem; font-weight: 600; overflow-wrap: anywhere; }
+
+    /* Orders empty state */
+    .orders-card {
+      position: relative; overflow: hidden;
+      padding: 30px 22px; text-align: center;
+      border: 2px dashed var(--line); border-radius: 22px;
+      background: linear-gradient(160deg, rgba(198, 241, 53, .16), transparent 60%), var(--surface);
+    }
+    .orders-emoji { display: inline-block; margin-bottom: 8px; font-size: 2.8rem; animation: floaty 4s ease-in-out infinite; }
+    .orders-card h5 { margin-bottom: 6px; font-size: 1.15rem; font-weight: 600; }
+    .orders-card p { max-width: 430px; margin: 0 auto 16px; color: var(--muted); font-size: .85rem; line-height: 1.55; }
+    .btn-shop {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 22px; border-radius: 999px;
+      background: var(--forest); color: #fff; font-size: .85rem; font-weight: 700;
+      transition: background .15s, transform .15s;
+    }
+    .btn-shop:hover { background: var(--forest-2); color: #fff; transform: translateY(-2px); }
+
+    /* Menu */
+    .menu-item {
+      display: flex; align-items: center; gap: 14px; width: 100%; padding: 15px 18px;
+      border-bottom: 1px solid var(--line); color: var(--ink);
+      transition: background .15s;
+    }
+    .menu-item:last-child { border-bottom: 0; }
+    .menu-item:hover { background: var(--soft); color: var(--ink); }
+    .menu-icon { transition: transform .2s; }
+    .menu-item:hover .menu-icon { transform: rotate(-6deg) scale(1.06); }
+    .menu-title { display: block; font-size: .92rem; font-weight: 700; }
+    .menu-description { display: block; margin-top: 2px; color: var(--muted); font-size: .76rem; }
+    .menu-arrow { margin-left: auto; color: var(--muted); transition: transform .2s; }
+    .menu-item:hover .menu-arrow { transform: translateX(3px); color: var(--brand); }
+
+    /* ---------- Edit profile modal ---------- */
+    .modal-backdrop { --bs-backdrop-bg: #07120c; }
+    .modal-backdrop.show { --bs-backdrop-opacity: .6; }
+
+    .modal-content {
+      overflow: hidden; border: 0; border-radius: 28px;
+      background: var(--surface); color: var(--ink);
+      box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .65);
+    }
+    .em-head {
+      position: relative; padding: 24px 24px 20px; color: #fff;
+      background: linear-gradient(120deg, var(--hero-a), var(--hero-b));
+    }
+    .em-head::after {
+      content: ''; position: absolute; right: -40px; top: -60px;
+      width: 170px; height: 170px; border-radius: 50%;
+      border: 2px dashed rgba(198, 241, 53, .35);
+    }
+    .em-head h5 { position: relative; z-index: 1; margin: 0 0 2px; font-size: 1.3rem; font-weight: 600; }
+    .em-head p { position: relative; z-index: 1; margin: 0; color: rgba(255, 255, 255, .72); font-size: .82rem; }
+    .em-close {
+      position: absolute; right: 14px; top: 14px; z-index: 5;
+      width: 34px; height: 34px; display: grid; place-items: center;
+      border: 1px solid rgba(255, 255, 255, .3); border-radius: 50%;
+      background: rgba(255, 255, 255, .14); color: #fff;
+    }
+    .em-grip { display: none; position: absolute; top: 8px; left: 50%; width: 44px; height: 5px; border-radius: 9px; background: rgba(255, 255, 255, .4); transform: translateX(-50%); }
+
+    .em-body { padding: 22px 24px 8px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; margin-bottom: 6px; font-size: .78rem; font-weight: 700; }
+    .input-wrap { position: relative; }
+    .input-wrap i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+    .pf-input {
+      width: 100%; height: 50px; padding: 0 15px 0 42px;
+      border: 1.5px solid var(--line); border-radius: 14px;
+      background: var(--bg); color: var(--ink);
+      font-family: 'Inter'; font-size: .92rem; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .pf-input:focus { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(198, 241, 53, .35); }
+    .pf-input.invalid { border-color: var(--coral); }
+    .form-msg { min-height: 18px; margin: -4px 0 6px; color: var(--coral); font-size: .8rem; font-weight: 600; }
+
+    .em-actions { display: flex; gap: 10px; padding: 8px 24px calc(22px + env(safe-area-inset-bottom, 0px)); }
+    .btn-cancel {
+      flex: 0 0 auto; padding: 0 20px; height: 50px;
+      border: 1.5px solid var(--line); border-radius: 999px;
+      background: transparent; color: var(--ink); font-size: .88rem; font-weight: 700;
+    }
+    .btn-save {
+      flex: 1; height: 50px; border: 0; border-radius: 999px;
+      background: var(--lime); color: var(--lime-ink);
+      font-size: .92rem; font-weight: 800;
+      transition: transform .12s, box-shadow .2s;
+    }
+    .btn-save:hover { transform: translateY(-1px); box-shadow: 0 12px 22px -10px rgba(198, 241, 53, .9); }
+
+    /* ---------- Toast ---------- */
+    .toast-message {
+      position: fixed; left: 50%; z-index: 2000;
+      bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+      max-width: calc(100vw - 32px);
+      display: flex; align-items: center; gap: 9px;
+      padding: 12px 20px; border-radius: 999px;
+      background: var(--lime); color: var(--lime-ink);
+      font-size: .85rem; font-weight: 700;
+      box-shadow: 0 16px 28px -12px rgba(0, 0, 0, .5);
+      opacity: 0; pointer-events: none; transform: translate(-50%, 30px);
+      transition: opacity .25s, transform .25s;
+    }
+    .toast-message.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 575.98px) {
+      .navbar-brand { font-size: 1rem; }
+      .profile-hero { flex-direction: column; align-items: stretch; padding: 22px 20px; border-radius: 24px; }
+      .ph-avatar { flex-basis: 70px; width: 70px; height: 70px; font-size: 1.6rem; }
+      .ph-edit { justify-content: center; }
+      .info-row { padding: 14px; }
+      .menu-item { padding: 14px; }
+
+      /* Bottom-sheet modal */
+      .modal-dialog { margin: 0; max-width: none; min-height: 100%; align-items: flex-end; }
+      .modal.fade .modal-dialog { transform: translateY(100%); transition: transform .38s cubic-bezier(.2, .9, .3, 1); }
+      .modal.show .modal-dialog { transform: none; }
+      .modal-content { width: 100%; border-radius: 28px 28px 0 0; }
+      .em-grip { display: block; }
+      .em-head { padding-top: 28px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+  <link rel="stylesheet" href="scrollbar.css">
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar sticky-top">
+    <div class="container py-2">
+      <div class="d-flex align-items-center w-100">
+        <a href="index.html" class="navbar-brand fw-bold d-flex align-items-center gap-2">
+          <span class="brand-icon"><i class="bi bi-leaf-fill"></i></span>
+          <span>10 Min <span class="brand-green">Grocery</span></span>
+        </a>
+
+        <div class="ms-auto d-flex gap-2">
+          <a href="cart.html" class="nav-icon" title="Cart"><i class="bi bi-cart3"></i></a>
+          <button class="nav-icon" id="themeToggle" type="button" title="Toggle dark mode">
+            <i class="bi bi-moon-stars"></i>
+          </button>
+          <a href="profile.html" class="nav-icon current" title="Profile"><i class="bi bi-person-fill"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <div class="profile-container">
+
+      <a href="index.html" class="back-link"><i class="bi bi-arrow-left"></i> Back to grocery</a>
+
+      <!-- Profile hero -->
+      <section class="profile-hero">
+        <div class="ph-main">
+          <div class="ph-avatar"><span id="avatarInitials">AJ</span></div>
+          <div class="ph-text">
+            <span class="ph-chip"><i class="bi bi-lightning-charge-fill"></i> 10-min member</span>
+            <h1 id="profileName">Alex Johnson</h1>
+            <p id="profileEmail">alex.johnson@example.com</p>
+          </div>
+        </div>
+
+        <button class="ph-edit" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+          <i class="bi bi-pencil"></i> Edit profile
+        </button>
+      </section>
+
+      <!-- Basic information -->
+      <h2 class="section-title">Basic Information</h2>
+      <section class="info-card">
+        <div class="info-row">
+          <div class="info-icon"><i class="bi bi-envelope"></i></div>
+          <div>
+            <span class="info-label">Email Address</span>
+            <span class="info-value" id="infoEmail">alex.johnson@example.com</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="bi bi-phone"></i></div>
+          <div>
+            <span class="info-label">Phone Number</span>
+            <span class="info-value" id="infoPhone">+1 555 123 4567</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Orders -->
+      <h2 class="section-title">Orders</h2>
+      <section class="orders-card">
+        <div class="orders-emoji">🧺</div>
+        <h5>Your orders will appear here</h5>
+        <p>Once you place an order, you can track its status and view your complete order history here.</p>
+        <a href="index.html" class="btn-shop">Start shopping <i class="bi bi-arrow-right"></i></a>
+      </section>
+
+      <!-- Account & support -->
+      <h2 class="section-title">Account &amp; Support</h2>
+      <section class="menu-card">
+        <a href="order-history.html" class="menu-item">
+          <span class="menu-icon"><i class="bi bi-bag"></i></span>
+          <span>
+            <span class="menu-title">Order History</span>
+            <span class="menu-description">View your previous grocery orders</span>
+          </span>
+          <i class="bi bi-chevron-right menu-arrow"></i>
+        </a>
+
+        <a href="#" class="menu-item">
+          <span class="menu-icon"><i class="bi bi-headset"></i></span>
+          <span>
+            <span class="menu-title">Help &amp; Support</span>
+            <span class="menu-description">Get help with your order or account</span>
+          </span>
+          <i class="bi bi-chevron-right menu-arrow"></i>
+        </a>
+
+        <a href="#" class="menu-item">
+          <span class="menu-icon"><i class="bi bi-question-circle"></i></span>
+          <span>
+            <span class="menu-title">Frequently Asked Questions</span>
+            <span class="menu-description">Find answers to common questions</span>
+          </span>
+          <i class="bi bi-chevron-right menu-arrow"></i>
+        </a>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Edit profile modal -->
+  <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="em-head">
+          <span class="em-grip"></span>
+          <button type="button" class="em-close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+          <h5 id="editTitle">Edit profile</h5>
+          <p>Keep your details up to date for faster checkout.</p>
+        </div>
+
+        <form id="profileForm" novalidate>
+          <div class="em-body">
+            <div class="field">
+              <label for="fName">Full name</label>
+              <div class="input-wrap">
+                <i class="bi bi-person"></i>
+                <input id="fName" class="pf-input" type="text" autocomplete="name" required>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="fEmail">Email address</label>
+              <div class="input-wrap">
+                <i class="bi bi-envelope"></i>
+                <input id="fEmail" class="pf-input" type="email" autocomplete="email" required>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="fPhone">Phone number</label>
+              <div class="input-wrap">
+                <i class="bi bi-phone"></i>
+                <input id="fPhone" class="pf-input" type="tel" autocomplete="tel" required>
+              </div>
+            </div>
+
+            <div class="form-msg" id="formMsg"></div>
+          </div>
+
+          <div class="em-actions">
+            <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn-save">Save changes</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast-message">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>Profile updated</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    /* ---------- Dark mode (same key as the homepage) ---------- */
+    const themeToggle = document.getElementById("themeToggle");
+    let savedTheme = null;
+    try { savedTheme = localStorage.getItem("grocery-theme"); } catch (e) {}
+
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (savedTheme ? savedTheme === "dark" : prefersDark) document.body.classList.add("dark-mode");
+
+    function updateThemeIcon() {
+      themeToggle.innerHTML = document.body.classList.contains("dark-mode")
+        ? '<i class="bi bi-sun"></i>'
+        : '<i class="bi bi-moon-stars"></i>';
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      try {
+        localStorage.setItem("grocery-theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+      } catch (e) {}
+      updateThemeIcon();
+    });
+    updateThemeIcon();
+
+    /* ---------- Profile data ---------- */
+    const $ = (id) => document.getElementById(id);
+    const defaults = { name: "Alex Johnson", email: "alex.johnson@example.com", phone: "+1 555 123 4567" };
+
+    let profile = { ...defaults };
+    try {
+      const stored = JSON.parse(localStorage.getItem("grocery-profile"));
+      if (stored) profile = { ...defaults, ...stored };
+    } catch (e) {}
+
+    function initialsOf(name) {
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      return ((parts[0]?.[0] || "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
+    }
+
+    function renderProfile() {
+      $("profileName").textContent = profile.name;
+      $("profileEmail").textContent = profile.email;
+      $("infoEmail").textContent = profile.email;
+      $("infoPhone").textContent = profile.phone;
+      $("avatarInitials").textContent = initialsOf(profile.name);
+    }
+    renderProfile();
+
+    /* ---------- Edit modal ---------- */
+    const modalEl = $("editProfileModal");
+    const formMsg = $("formMsg");
+
+    modalEl.addEventListener("show.bs.modal", () => {
+      $("fName").value = profile.name;
+      $("fEmail").value = profile.email;
+      $("fPhone").value = profile.phone;
+      formMsg.textContent = "";
+      modalEl.querySelectorAll(".pf-input").forEach((i) => i.classList.remove("invalid"));
+    });
+
+    $("profileForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = $("fName").value.trim();
+      const email = $("fEmail").value.trim();
+      const phone = $("fPhone").value.trim();
+
+      const checks = [
+        [$("fName"), name.length > 1, "Please enter your full name."],
+        [$("fEmail"), $("fEmail").checkValidity() && email.length > 0, "Please enter a valid email address."],
+        [$("fPhone"), phone.replace(/\D/g, "").length >= 7, "Please enter a valid phone number."]
+      ];
+
+      modalEl.querySelectorAll(".pf-input").forEach((i) => i.classList.remove("invalid"));
+      const failed = checks.find(([, ok]) => !ok);
+      if (failed) {
+        failed[0].classList.add("invalid");
+        failed[0].focus();
+        formMsg.textContent = failed[2];
+        return;
+      }
+
+      profile = { name, email, phone };
+      try { localStorage.setItem("grocery-profile", JSON.stringify(profile)); } catch (e) {}
+      renderProfile();
+
+      bootstrap.Modal.getInstance(modalEl).hide();
+      showToast("Profile updated");
+    });
+
+    function showToast(message) {
+      const toast = $("toast");
+      toast.querySelector("span").textContent = message;
+      toast.classList.add("show");
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+  </script>
+</body>
+
+</html>

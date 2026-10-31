@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\cart.cshtml" />
+    <Content Remove="Views\coupon.cshtml" />
+    <Content Remove="Views\index.cshtml" />
+    <Content Remove="Views\login.cshtml" />
+    <Content Remove="Views\order-history.cshtml" />
+    <Content Remove="Views\profile.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
     <PackageReference Include="Microsoft.SqlServer.Server" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
@@ -15,6 +24,15 @@
 
   <ItemGroup>
     <Folder Include="Filters\" />
+    <Folder Include="Views\Admin\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\cart.cshtml" />
+    <None Include="Views\coupon.cshtml" />
+    <None Include="Views\login.cshtml" />
+    <None Include="Views\order-history.cshtml" />
+    <None Include="Views\profile.cshtml" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in — QuickBasket</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; }
+
+  :root{
+    --ink:#16241D;
+    --muted:#6B7A70;
+    --bg:#FCFBF7;
+    --surface:#FFFFFF;
+    --forest:#123524;
+    --forest-2:#1B4332;
+    --lime:#C6F135;
+    --lime-ink:#294011;
+    --coral:#FF6B4A;
+    --line:#E7E5DC;
+    --radius:14px;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#EDEDE7;
+      --muted:#93A398;
+      --bg:#0F1712;
+      --surface:#182019;
+      --forest:#2F6B4E;
+      --forest-2:#3A7D5C;
+      --lime-ink:#182B10;
+      --coral:#FF8768;
+      --line:#263029;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#EDEDE7;
+    --muted:#93A398;
+    --bg:#0F1712;
+    --surface:#182019;
+    --forest:#2F6B4E;
+    --forest-2:#3A7D5C;
+    --lime-ink:#182B10;
+    --coral:#FF8768;
+    --line:#263029;
+  }
+
+  html, body{
+    margin:0;
+    min-height:100%;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    transition: background .2s ease, color .2s ease;
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+    padding-top: max(24px, env(safe-area-inset-top,0px));
+    padding-bottom: max(24px, env(safe-area-inset-bottom,0px));
+  }
+
+  h1,h2,.display-font{ font-family:'Fredoka',system-ui,sans-serif; }
+
+  .theme-toggle{
+    position:fixed;
+    top: max(16px, env(safe-area-inset-top,0px));
+    right:16px;
+    width:38px;height:38px;
+    border-radius:50%;
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1rem;
+    cursor:pointer;
+  }
+  .theme-toggle:active{ transform:scale(.94); }
+
+  .auth{ width:min(100%, 420px); }
+  .screen{ width:100%; }
+  .screen.hidden{ display:none; }
+
+  .content{ animation: enter 260ms ease both; }
+  @keyframes enter{
+    from{ opacity:0; transform:translateX(18px); }
+    to{ opacity:1; transform:translateX(0); }
+  }
+  @media (prefers-reduced-motion: reduce){ .content{ animation:none; } }
+
+  .back{
+    width:36px;height:36px;
+    border:0;
+    background:transparent;
+    padding:0;
+    margin-bottom:24px;
+    cursor:pointer;
+    color:var(--ink);
+    font-size:22px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+  }
+  .back:hover{ background:var(--line); }
+
+  h1{
+    margin:0 0 8px;
+    font-size:clamp(24px, 6vw, 30px);
+    line-height:1.15;
+    font-weight:600;
+  }
+  .description{
+    margin:0 0 26px;
+    color:var(--muted);
+    font-size:.94rem;
+    line-height:1.5;
+  }
+
+  label{
+    display:block;
+    margin-bottom:7px;
+    font-size:.85rem;
+    font-weight:600;
+  }
+
+  .input, textarea.input{
+    width:100%;
+    height:50px;
+    padding:0 15px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    outline:none;
+    font-size:.95rem;
+    font-family:'Inter';
+    color:var(--ink);
+    background:var(--surface);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  textarea.input{
+    height:auto;
+    min-height:70px;
+    padding:12px 15px;
+    resize:none;
+  }
+  .input:focus{
+    border-color:var(--forest);
+    box-shadow: 0 0 0 3px rgba(198,241,53,.3);
+  }
+
+  .field{ margin-bottom:16px; }
+
+  .button{
+    width:100%;
+    height:50px;
+    margin-top:6px;
+    border:0;
+    border-radius:999px;
+    background:var(--forest);
+    color:#fff;
+    font-size:.95rem;
+    font-weight:600;
+    cursor:pointer;
+    transition: background .2s, transform .1s;
+  }
+  .button:hover{ background:var(--forest-2); }
+  .button:active{ transform:scale(.99); }
+  .button:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .otp-container{ display:flex; gap:10px; }
+  .otp{
+    flex:1;
+    min-width:0;
+    height:56px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    outline:none;
+    text-align:center;
+    font-size:1.4rem;
+    font-weight:600;
+    font-family:'Fredoka';
+    color:var(--ink);
+    background:var(--surface);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .otp:focus{
+    border-color:var(--forest);
+    box-shadow: 0 0 0 3px rgba(198,241,53,.3);
+  }
+
+  .resend{
+    margin-top:16px;
+    text-align:center;
+    font-size:.85rem;
+    color:var(--muted);
+  }
+  .resend button{
+    border:0;
+    background:transparent;
+    padding:0;
+    color:var(--forest);
+    font:inherit;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .resend button:disabled{ color:var(--muted); cursor:default; }
+
+  .message{
+    min-height:18px;
+    margin-top:10px;
+    color:var(--coral);
+    font-size:.82rem;
+  }
+
+  /* Profile step */
+  .row-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  /* Success view (shown after profile save) */
+  .success-view{ text-align:center; padding: 20px 0 4px; }
+  .success-check{ display:flex; justify-content:center; margin-bottom:14px; }
+  .success-check-circle{
+    stroke:var(--lime-ink);
+    stroke-width:2;
+    stroke-dasharray:151;
+    stroke-dashoffset:151;
+    fill:var(--lime);
+    animation: circleDraw .5s ease forwards;
+  }
+  .success-check-mark{
+    stroke:var(--lime-ink);
+    stroke-width:3.5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:32;
+    stroke-dashoffset:32;
+    animation: checkDraw .35s ease .45s forwards;
+  }
+  @keyframes circleDraw{ to{ stroke-dashoffset:0; } }
+  @keyframes checkDraw{ to{ stroke-dashoffset:0; } }
+  .success-view h2{ font-size:1.2rem; margin:0 0 6px; }
+  .success-view p{ color:var(--muted); font-size:.9rem; margin:0; }
+
+  @media (max-width:480px){
+    body{ align-items:flex-start; padding: 28px 20px; }
+    .auth{ padding-top:9vh; }
+    .row-2{ grid-template-columns:1fr; }
+  }
+</style>
+<link rel="stylesheet" href="scrollbar.css">
+</head>
+
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+
+<main class="auth">
+
+  <!-- STEP 1: EMAIL -->
+  <section id="emailScreen" class="screen">
+    <div class="content">
+      <h1>Welcome</h1>
+      <p class="description">Enter your email address to continue</p>
+
+      <form id="emailForm">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" class="input" type="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div id="emailMessage" class="message"></div>
+
+        <button class="button" type="submit">Next</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- STEP 2: OTP -->
+  <section id="otpScreen" class="screen hidden">
+    <div class="content">
+      <button id="backButton" class="back" type="button" aria-label="Go back">&#8592;</button>
+
+      <h1>Enter OTP</h1>
+      <p class="description">We've sent a 4 digit code to <span id="emailPreview"></span></p>
+
+      <form id="otpForm">
+        <div class="otp-container">
+          <input class="otp" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="OTP digit 1">
+          <input class="otp" maxlength="1" inputmode="numeric" aria-label="OTP digit 2">
+          <input class="otp" maxlength="1" inputmode="numeric" aria-label="OTP digit 3">
+          <input class="otp" maxlength="1" inputmode="numeric" aria-label="OTP digit 4">
+        </div>
+
+        <div id="otpMessage" class="message"></div>
+
+        <button id="verifyButton" class="button" type="submit" disabled>Verify</button>
+      </form>
+
+      <div class="resend">
+        <button id="resendButton" type="button" disabled>Resend code</button>
+        <span id="timer"> in 00:45</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: PROFILE SETUP -->
+  <section id="profileScreen" class="screen hidden">
+    <div class="content">
+
+      <div id="profileForm">
+        <h1>Complete your profile</h1>
+        <p class="description">Just this once — so we know where to deliver</p>
+
+        <form id="profileFormEl">
+          <div class="field">
+            <label for="fullName">Full name</label>
+            <input id="fullName" class="input" type="text" placeholder="Aarav Mehta" autocomplete="name" required>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone number</label>
+            <input id="phone" class="input" type="tel" placeholder="98765 43210" inputmode="numeric" autocomplete="tel" required>
+          </div>
+
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea id="address" class="input" placeholder="House / flat no., street, area" autocomplete="street-address" required></textarea>
+          </div>
+
+          <div class="field">
+            <label for="pincode">Pincode</label>
+            <input id="pincode" class="input" type="text" placeholder="641005" inputmode="numeric" maxlength="6" autocomplete="postal-code" required>
+          </div>
+
+          <div id="profileMessage" class="message"></div>
+
+          <button id="saveProfileButton" class="button" type="submit" disabled>Save & continue</button>
+        </form>
+      </div>
+
+      <div id="profileSuccess" class="success-view hidden">
+        <div class="success-check">
+          <svg viewBox="0 0 52 52" width="56" height="56">
+            <circle class="success-check-circle" cx="26" cy="26" r="24" fill="none"/>
+            <path class="success-check-mark" fill="none" d="M14 27l7 7 16-16"/>
+          </svg>
+        </div>
+        <h2>You're all set!</h2>
+        <p>Your profile has been saved.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Theme toggle
+  const htmlEl = document.documentElement;
+  const themeToggle = document.getElementById("themeToggle");
+  function isDarkActive(){
+    const attr = htmlEl.getAttribute("data-theme");
+    if (attr === "dark") return true;
+    if (attr === "light") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function refreshToggleIcon(){ themeToggle.textContent = isDarkActive() ? "☀️" : "🌙"; }
+  let savedTheme = null;
+  try{ savedTheme = localStorage.getItem("cartTheme"); }catch(e){}
+  if (savedTheme) htmlEl.setAttribute("data-theme", savedTheme);
+  refreshToggleIcon();
+  themeToggle.addEventListener("click", () => {
+    const next = isDarkActive() ? "light" : "dark";
+    htmlEl.setAttribute("data-theme", next);
+    refreshToggleIcon();
+    try{ localStorage.setItem("cartTheme", next); }catch(e){}
+  });
+
+  // Screens
+  const emailScreen = document.getElementById("emailScreen");
+  const otpScreen = document.getElementById("otpScreen");
+  const profileScreen = document.getElementById("profileScreen");
+  const emailForm = document.getElementById("emailForm");
+  const otpForm = document.getElementById("otpForm");
+  const emailInput = document.getElementById("email");
+  const emailPreview = document.getElementById("emailPreview");
+  const emailMessage = document.getElementById("emailMessage");
+  const otpMessage = document.getElementById("otpMessage");
+  const verifyButton = document.getElementById("verifyButton");
+  const resendButton = document.getElementById("resendButton");
+  const timer = document.getElementById("timer");
+  const backButton = document.getElementById("backButton");
+  const otpInputs = [...document.querySelectorAll(".otp")];
+
+  let countdown;
+  let seconds = 45;
+
+  function showScreen(screenToShow){
+    [emailScreen, otpScreen, profileScreen].forEach(s => s.classList.toggle("hidden", s !== screenToShow));
+    const content = screenToShow.querySelector(".content");
+    content.style.animation = "none";
+    void content.offsetWidth;
+    content.style.animation = "";
+  }
+
+  emailForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!emailInput.checkValidity()){
+      emailMessage.textContent = "Please enter a valid email address.";
+      emailInput.focus();
+      return;
+    }
+    emailMessage.textContent = "";
+    emailPreview.textContent = emailInput.value;
+    otpInputs.forEach(input => input.value = "");
+    verifyButton.disabled = true;
+    showScreen(otpScreen);
+    startTimer();
+    setTimeout(() => otpInputs[0].focus(), 280);
+    console.log("Send OTP to:", emailInput.value);
+  });
+
+  otpInputs.forEach((input, index) => {
+    input.addEventListener("input", (event) => {
+      event.target.value = event.target.value.replace(/\D/g, "").slice(0, 1);
+      if (event.target.value && index < otpInputs.length - 1) otpInputs[index + 1].focus();
+      updateVerifyState();
+    });
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Backspace" && !input.value && index > 0) otpInputs[index - 1].focus();
+      if (event.key === "ArrowLeft" && index > 0) otpInputs[index - 1].focus();
+      if (event.key === "ArrowRight" && index < otpInputs.length - 1) otpInputs[index + 1].focus();
+    });
+    input.addEventListener("paste", (event) => {
+      event.preventDefault();
+      const pasted = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
+      pasted.split("").forEach((digit, i) => { if (otpInputs[i]) otpInputs[i].value = digit; });
+      const next = Math.min(pasted.length, 3);
+      otpInputs[next].focus();
+      updateVerifyState();
+    });
+  });
+
+  function updateVerifyState(){
+    const otp = otpInputs.map(input => input.value).join("");
+    verifyButton.disabled = otp.length !== 4;
+  }
+
+  otpForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const otp = otpInputs.map(input => input.value).join("");
+    if (otp.length !== 4) return;
+
+    clearInterval(countdown);
+    otpMessage.style.color = "var(--forest)";
+    otpMessage.textContent = "Verified. Setting up your profile...";
+    console.log("Verify:", { email: emailInput.value, otp });
+
+    setTimeout(() => {
+      otpMessage.textContent = "";
+      showScreen(profileScreen);
+      setTimeout(() => document.getElementById("fullName").focus(), 280);
+    }, 700);
+  });
+
+  backButton.addEventListener("click", () => {
+    clearInterval(countdown);
+    otpMessage.textContent = "";
+    showScreen(emailScreen);
+    setTimeout(() => emailInput.focus(), 280);
+  });
+
+  resendButton.addEventListener("click", () => {
+    console.log("Resend OTP to:", emailInput.value);
+    seconds = 45;
+    startTimer();
+    otpInputs.forEach(input => input.value = "");
+    verifyButton.disabled = true;
+    otpInputs[0].focus();
+  });
+
+  function startTimer(){
+    clearInterval(countdown);
+    seconds = 45;
+    resendButton.disabled = true;
+    updateTimer();
+    countdown = setInterval(() => {
+      seconds--;
+      updateTimer();
+      if (seconds <= 0){
+        clearInterval(countdown);
+        resendButton.disabled = false;
+        timer.textContent = "";
+      }
+    }, 1000);
+  }
+  function updateTimer(){ timer.textContent = ` in 00:${String(seconds).padStart(2, "0")}`; }
+
+  // STEP 3: Profile setup
+  const profileFormEl = document.getElementById("profileFormEl");
+  const fullNameInput = document.getElementById("fullName");
+  const phoneInput = document.getElementById("phone");
+  const addressInput = document.getElementById("address");
+  const pincodeInput = document.getElementById("pincode");
+  const saveProfileButton = document.getElementById("saveProfileButton");
+  const profileMessage = document.getElementById("profileMessage");
+  const profileForm = document.getElementById("profileForm");
+  const profileSuccess = document.getElementById("profileSuccess");
+
+  pincodeInput.addEventListener("input", () => {
+    pincodeInput.value = pincodeInput.value.replace(/\D/g, "").slice(0, 6);
+    updateProfileState();
+  });
+  phoneInput.addEventListener("input", () => {
+    phoneInput.value = phoneInput.value.replace(/[^\d\s]/g, "");
+    updateProfileState();
+  });
+  [fullNameInput, addressInput].forEach(el => el.addEventListener("input", updateProfileState));
+
+  function updateProfileState(){
+    const nameOk = fullNameInput.value.trim().length > 1;
+    const phoneOk = phoneInput.value.replace(/\D/g, "").length >= 10;
+    const addressOk = addressInput.value.trim().length > 4;
+    const pincodeOk = /^\d{6}$/.test(pincodeInput.value);
+    saveProfileButton.disabled = !(nameOk && phoneOk && addressOk && pincodeOk);
+  }
+
+  profileFormEl.addEventListener("submit", (event) => {
+    event.preventDefault();
+    updateProfileState();
+    if (saveProfileButton.disabled) return;
+
+    profileMessage.textContent = "";
+
+    // Replace this with your API call to save the profile.
+    console.log("Save profile:", {
+      name: fullNameInput.value.trim(),
+      phone: phoneInput.value.trim(),
+      address: addressInput.value.trim(),
+      pincode: pincodeInput.value.trim()
+    });
+    documents.window.location.href = "index.html";
+    
+    profileForm.classList.add("hidden");
+    profileSuccess.classList.remove("hidden");
+  });
+</script>
+</body>
+</html>
